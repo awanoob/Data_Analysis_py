@@ -2,8 +2,6 @@ import numpy as np
 from main_func.error_cal.error_cal_lib import *
 
 
-def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray) -> np.ndarray:
-    heading_truth = array_bchmk[:, 5]
 def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dict) -> np.ndarray:
     heading_truth = -np.deg2rad(array_bchmk[:, 5])
     n_bchmk = np.zeros((len(heading_truth), 1))
@@ -13,7 +11,6 @@ def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dic
     # 经纬度转横轴墨卡托投影坐标
     e_bchmk, n_bchmk = wgs84_to_utm(array_bchmk[:, 2], array_bchmk[:, 3])
     e_test, n_test = wgs84_to_utm(array_test[:, 2], array_test[:, 3])
-    distance = get_distance(n_bchmk, e_bchmk, array_bchmk[:, 4], array_bchmk[:, ])
     distance = get_distance(n_bchmk, e_bchmk, array_bchmk[:, 4], array_bchmk[:, 5], array_bchmk[:, 6])
     # 东向、北向和天向误差
     err_e = e_test - e_bchmk
