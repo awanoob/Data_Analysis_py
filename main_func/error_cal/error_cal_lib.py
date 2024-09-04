@@ -70,8 +70,27 @@ def syserr_cal_alg(data: np.ndarray) -> np.ndarray:
     return data
 
 
-def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype):
-    pass
+def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
+    syserr = {"x": 0, "y": 0, "alt": 0, "roll": 0, "pitch": 0, "heading": 0}
+    fix_ratio = np.count_nonzero(postype == 1)/len(postype)
+    syserr_set2zero = 1 if fix_ratio < 0.2 else 0
+    if syserr_set2zero:
+        print("Fix ratio is too low, cannot calculate system error.\n")
+
+    syserr_keys = ["x", "y", "alt", "roll", "pitch", "heading"]
+    input_keys = ["cal_pos_syserr", "cal_pos_syserr", "cal_alt_syserr", "cal_att_syserr", "cal_att_syserr", "cal_att_syserr"]
+    usr_def_keys = ["usr_def_syserr_x", "usr_def_syserr_y", "usr_def_syserr_alt", "usr_def_syserr_r", "usr_def_syserr_p", "usr_def_syserr_h"]
+    data = [x, y, alt, roll, pitch, heading]
+
+    for i, key in enumerate(syserr_keys):
+        if_cal_syserr = syserr_set2zero + input_cfg[input_keys[i]] + input_cfg[usr_def_keys[i]]
+        if if_cal_syserr == -1:
+            data_fix = data[i][postype == 1]
+            syserr[key] = syserr_cal_alg(data_fix)
+        elif if_cal_syserr in [1, 2, 5, 6]:
+            syserr[key] = input_cfg["usr_def_syserr_list"][i]
+
+    return syserr
 
 
 __all__ = ['wgs84_to_utm', 'get_distance', 'check_deg', 'get_syserr']
