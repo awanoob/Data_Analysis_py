@@ -7,11 +7,11 @@ import numpy as np
 
 
 # navplot协议数据解析
-def _decode_navplot(data_path: str) -> np.ndarray:
+def decode_navplot(data_path: str) -> np.ndarray:
     # 以空格作为分隔符读取数据
     file_matrix = np.genfromtxt(data_path, delimiter=None, encoding='utf-8')
     # 将特定列的数据提取出来，组成新的数据矩阵
-    data_matrix = np.zeros((file_matrix.shape[0], 23))
+    data_matrix = np.zeros((file_matrix.shape[0], 24))
     data_matrix[:, 0] = file_matrix[:, 0]
     data_matrix[:, 1] = file_matrix[:, 1]
     data_matrix[:, 2] = file_matrix[:, 2]
@@ -26,16 +26,7 @@ def _decode_navplot(data_path: str) -> np.ndarray:
     data_matrix[:, 11] = file_matrix[:, 5]
     data_matrix[:, 12] = file_matrix[:, 14]
     data_matrix[:, 13] = file_matrix[:, 6]
-    data_matrix[:, 14] = file_matrix[:, 7]
-    data_matrix[:, 15] = file_matrix[:, 8]
-    data_matrix[:, 16] = file_matrix[:, 9]
-    data_matrix[:, 17] = file_matrix[:, 21]
-    data_matrix[:, 18] = file_matrix[:, 22]
-    data_matrix[:, 19] = file_matrix[:, 23]
-    data_matrix[:, 20] = file_matrix[:, 24]
-    data_matrix[:, 21] = file_matrix[:, 25]
-    data_matrix[:, 22] = file_matrix[:, 26]
     return data_matrix
 
 
-__all__ = ['_decode_navplot']
+__all__ = ['decode_navplot']

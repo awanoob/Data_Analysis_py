@@ -1,2 +1,2 @@
-def _report_gen():
+def report_gen_func():
     pass
