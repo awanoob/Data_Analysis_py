@@ -2,8 +2,11 @@ import math
 import numpy as np
 
 from pyproj import Proj, Transformer
+from copy import deepcopy
+
 
 def wgs84_to_utm(lat:np.ndarray, lon:np.ndarray) -> np.ndarray:
+def wgs84_to_utm(lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
     # 根据经度自动选择合适的UTM坐标系
     utm_zone = np.floor((lon + 180) / 6).astype(int) + 1
     unique_zones = np.unique(utm_zone)
@@ -137,9 +140,61 @@ def proj_TM(latitude: np.ndarray, longitude: np.ndarray) -> np.ndarray:
 
 
 def get_distance(e, n, alt, ve, vn):
+def get_distance(e: np.ndarray, n: np.ndarray, alt: np.ndarray, ve: np.ndarray, vn: np.ndarray) -> np.ndarray:
+    distance = np.zeros((len(e), 1))
+    dis_diff = 0
+    v0 = np.sqrt(np.power(ve, 2) + np.power(vn, 2))
+    e_diff = np.vstack(np.array([0]), np.diff(e))
+    n_diff = np.vstack(np.array([0]), np.diff(n))
+    alt_diff = np.vstack(np.array([0]), np.diff(alt))
+    for i in range(len(e)):
+        if v0[i] > 0.02:
+            dis_diff = dis_diff + np.sqrt(np.power(e_diff[i], 2) + np.power(n_diff[i], 2) + np.power(alt_diff[i], 2))
+            distance[i] = dis_diff
+    return distance
+
+
+def check_deg(deg_input: np.ndarray) -> np.ndarray:
+    deg_output = np.zeros((len(deg_input), 1))
+    for i in range(len(deg_input)):
+        if deg_input[i] > 180:
+            deg_output[i] = deg_input[i] - 360
+        elif deg_input[i] < -180:
+            deg_output[i] = deg_input[i] + 360
+        else:
+            deg_output[i] = deg_input[i]
+    return deg_output
+
+
+def syserr_cal_alg(data: np.ndarray) -> np.ndarray:
+    for num in range(5):
+        numdata = []
+        me = np.mean(data)
+        n = len(data)
+        newdata = deepcopy(data)
+        olddata = deepcopy(data)
+        for i in range(n):
+            olddata[i] = olddata[i] - me
+            newdata[i] = abs(olddata[i])
+        newdata.sort()
+        if newdata != []:
+            sigma = newdata[int(n / 2)] / 0.6745 * 2.5 # 2.5倍中值绝对偏差
+        else:
+            sigma = 0
+        for k in range(n):
+            if abs(olddata[k]) > sigma:
+                numdata.append(k)
+        numdata.sort(reverse=True)
+        for m in numdata:
+            del data[m]
+    return data
+
+
+def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype):
     pass
 
 
 
 
 __all__ = ['wgs84_to_utm', 'proj_TM', 'get_distance']
+__all__ = ['wgs84_to_utm', 'get_distance', 'check_deg', 'get_syserr']
