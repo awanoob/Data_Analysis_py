@@ -9,6 +9,6 @@ def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray) -> np.ndarray:
     n_test = np.zeros((len(heading_truth), 1))
     e_test = np.zeros((len(heading_truth), 1))
     # 经纬度转横轴墨卡托投影坐标
-    e_bchmk, n_bchmk = proj_TM(array_bchmk[:, 2], array_bchmk[:, 3])
-    e_test, n_test = proj_TM(array_test[:, 2], array_test[:, 3])
+    e_bchmk, n_bchmk = wgs84_to_utm(array_bchmk[:, 2], array_bchmk[:, 3])
+    e_test, n_test = wgs84_to_utm(array_test[:, 2], array_test[:, 3])
     distance = get_distance(n_bchmk, e_bchmk, array_bchmk[:, 4], array_bchmk[:, ])

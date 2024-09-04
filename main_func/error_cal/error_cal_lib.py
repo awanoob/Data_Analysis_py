@@ -1,6 +1,25 @@
 import math
 import numpy as np
 
+from pyproj import Proj, Transformer
+
+def wgs84_to_utm(lat:np.ndarray, lon:np.ndarray) -> np.ndarray:
+    # 根据经度自动选择合适的UTM坐标系
+    utm_zone = np.floor((lon + 180) / 6).astype(int) + 1
+    unique_zones = np.unique(utm_zone)
+
+    easting = np.zeros_like(lat)
+    northing = np.zeros_like(lon)
+
+    for zone in unique_zones:
+        mask = utm_zone == zone
+        utm_proj_str = f"+proj=utm +zone={zone} +datum=WGS84"
+        transformer = Transformer.from_crs("EPSG:4326", utm_proj_str)
+        easting[mask], northing[mask] = transformer.transform(lat[mask], lon[mask])
+
+    return easting, northing, utm_zone
+
+
 
 def proj_TM(latitude: np.ndarray, longitude: np.ndarray) -> np.ndarray:
     # WGS84椭球参数
@@ -118,8 +137,9 @@ def proj_TM(latitude: np.ndarray, longitude: np.ndarray) -> np.ndarray:
 
 
 def get_distance(e, n, alt, ve, vn):
+    pass
 
 
 
 
-__all__ = ['proj_TM', 'get_distance']
+__all__ = ['wgs84_to_utm', 'proj_TM', 'get_distance']
