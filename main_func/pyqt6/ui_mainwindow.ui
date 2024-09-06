@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +14,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>导航数据处理</string>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonIconOnly</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="pushButton">
@@ -41,10 +47,22 @@
     <property name="title">
      <string>文件</string>
     </property>
+    <addaction name="actiontest_file"/>
+    <addaction name="actiontrue_file"/>
    </widget>
    <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actiontest_file">
+   <property name="text">
+    <string>打开测试数据</string>
+   </property>
+  </action>
+  <action name="actiontrue_file">
+   <property name="text">
+    <string>打开基准数据</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

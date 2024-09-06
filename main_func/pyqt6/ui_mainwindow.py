@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'untitled.ui'
+# Form implementation generated from reading ui file 'ui_mainwindow.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -12,7 +12,9 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
+        MainWindow.setWindowModality(QtCore.Qt.WindowModality.NonModal)
         MainWindow.resize(800, 600)
+        MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonIconOnly)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton = QtWidgets.QPushButton(parent=self.centralwidget)
@@ -28,6 +30,12 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actiontest_file = QtGui.QAction(parent=MainWindow)
+        self.actiontest_file.setObjectName("actiontest_file")
+        self.actiontrue_file = QtGui.QAction(parent=MainWindow)
+        self.actiontrue_file.setObjectName("actiontrue_file")
+        self.menu.addAction(self.actiontest_file)
+        self.menu.addAction(self.actiontrue_file)
         self.menubar.addAction(self.menu.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -35,6 +43,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "导航数据处理"))
         self.pushButton.setText(_translate("MainWindow", "确定"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
+        self.actiontest_file.setText(_translate("MainWindow", "打开测试数据"))
+        self.actiontrue_file.setText(_translate("MainWindow", "打开基准数据"))
