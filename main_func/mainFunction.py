@@ -13,7 +13,8 @@ from report_output.report_gen import report_gen_func
 
 
 def mainFunc(input_cfg: dict):
-    i = 0
+    if input_cfg['output_multi_fig']:
+        multi_dev_err_dict = {k: np.array([]) for k in input_cfg['dev_name_list']}
     for i in range(len(input_cfg['path_in_list'])):
         # 根据被测数据文件名称生成项目子路径
         proj_path_dev = join(input_cfg['path_proj'], basename(input_cfg['path_in_list'][i]).split('.')[0])
@@ -44,7 +45,8 @@ def mainFunc(input_cfg: dict):
         array_bchmk = array_bchmk_ori[np.isin(array_bchmk_ori[:, 1], indx_common)]
         array_test = array_test_ori[np.isin(array_test_ori[:, 1], indx_common)]
         # 计算误差
-        errlist = err_cal_func(array_bchmk, array_test)
+        errlist = err_cal_func(array_bchmk, array_test, input_cfg)
+        multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
 
         # 输出误差时间图像和统计报告
         err_time_plot_stat(errlist, proj_path_dev, input_cfg)
@@ -54,6 +56,10 @@ def mainFunc(input_cfg: dict):
 
         # 输出DR误差统计
         dr_err_stat(errlist, proj_path_dev, input_cfg)
+
+    if input_cfg['output_multi_fig']:
+        # 输出多设备误差对比图
+        multi_dev_err_plot(multi_dev_err_dict, input_cfg)
 
     # 输出报告
     report_gen_func()
