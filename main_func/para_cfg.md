@@ -18,6 +18,7 @@ data_agg_list: [1] # [list] 数据协议，列表；1:navplot...(待定)
 data_agg_truth: 1 # [int] 基准文件数据协议
 data_frq: [10] # [list] 数据频率，列表
 data_frq_truth: 10 # [int] 基准数据频率
+dev_name_list: ["1250"] # [list] 对应文件的设备名称，列表
 ```
 
 ## 3、输入选项

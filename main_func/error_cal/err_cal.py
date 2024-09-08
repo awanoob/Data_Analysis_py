@@ -1,5 +1,5 @@
 import numpy as np
-from main_func.error_cal.error_cal_lib import *
+from error_cal.error_cal_lib import *
 
 
 def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dict) -> np.ndarray:
@@ -46,6 +46,6 @@ def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dic
     err_pitch = err_pitch - syserr["pitch"]
     err_heading = err_heading - syserr["heading"]
 
-    errlist = np.hstack((array_bchmk[:, 0], array_bchmk[:, 1], err_x, err_y, err_alt, err_ve, err_vn, err_vu, err_roll, err_pitch, err_heading, err_pos, distance, array_test[:, 11], array_test[:, 13], array_test[:, 14]))
+    errlist = np.hstack((array_bchmk[:, 0], array_bchmk[:, 1], err_x, err_y, err_alt, err_ve, err_vn, err_vu, err_roll, err_pitch, err_heading, err_pos, distance, array_test[:, 11], array_test[:, 13], array_test[:, 14], e_test, n_test))
 
     return errlist
