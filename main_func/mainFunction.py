@@ -4,11 +4,13 @@
 # Version: 0.1
 # Description: This function is the main function of the project. It is used to call other functions in the project.
 # Input: input_cfg: dict, the configuration of the project
-from os.path import basename, join
+from os.path import basename, join, exists
+from os import makedirs
 import numpy as np
 from data_read_and_decode.data_rnd_lib import *
 from error_cal.err_cal import err_cal_func
 from err_plot_and_stat.err_plot_and_stat_lib import *
+from err_plot_and_stat.result_gen import result_gen_func
 from report_output.report_gen import report_gen_func
 
 
@@ -17,7 +19,10 @@ def mainFunc(input_cfg: dict):
         multi_dev_err_dict = {k: np.array([]) for k in input_cfg['dev_name_list']}
     for i in range(len(input_cfg['path_in_list'])):
         # 根据被测数据文件名称生成项目子路径
-        proj_path_dev = join(input_cfg['path_proj'], basename(input_cfg['path_in_list'][i]).split('.')[0])
+        proj_path_dev = join(input_cfg['path_proj'], input_cfg['dev_name_list'][i])
+        # 创建项目子路径
+        if not exists(proj_path_dev):
+            makedirs(proj_path_dev)
         # 基准设备数据读取
         array_bchmk_ori = data_decode(input_cfg['path_truth'], input_cfg['data_agg_truth'])
         # 测试设备数据读取
@@ -48,14 +53,17 @@ def mainFunc(input_cfg: dict):
         errlist = err_cal_func(array_bchmk, array_test, input_cfg)
         multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
 
-        # 输出误差时间图像和统计报告
-        err_time_plot_stat(errlist, proj_path_dev, input_cfg)
+        # 生成图像和统计表结果
+        result_gen_func(array_bchmk, array_test, errlist, proj_path_dev, input_cfg)
 
-        # 输出固定解，浮动解误差时间图像和统计报告
-        fix_float_err_time_plot_stat(errlist, proj_path_dev, input_cfg)
+        # # 输出误差时间图像和统计报告
+        # err_time_plot_stat(errlist, proj_path_dev, input_cfg)
 
-        # 输出DR误差统计
-        dr_err_stat(errlist, proj_path_dev, input_cfg)
+        # # 输出固定解，浮动解误差时间图像和统计报告
+        # fix_float_err_time_plot_stat(errlist, proj_path_dev, input_cfg)
+
+        # # 输出DR误差统计
+        # dr_err_stat(errlist, proj_path_dev, input_cfg)
 
     if input_cfg['output_multi_fig']:
         # 输出多设备误差对比图
