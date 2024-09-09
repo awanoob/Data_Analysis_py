@@ -4,6 +4,7 @@ from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QComboBox, QCheckBox, QMenu
 from ui_mainwindow import Ui_MainWindow  # 导入你原来的UI类
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -13,23 +14,54 @@ class MainWindow(QtWidgets.QMainWindow):
         # 绑定菜单动作到openFile方法
         self.ui.action_file.triggered.connect(self.open_files)
 
-        # 设置表格
+        # 设置tableWidget的列数和表头
         self.ui.tableWidget.setColumnCount(4)
         self.ui.tableWidget.setHorizontalHeaderLabels(["文件名", "文件格式", "频率", "真值文件"])
 
-        # 启用右键菜单
-        self.ui.tableWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
-        self.ui.tableWidget.customContextMenuRequested.connect(self.show_context_menu)
+        # 设置tableWidget_2的列数和表头
+        self.ui.tableWidget_2.setColumnCount(3)
+        self.ui.tableWidget_2.setHorizontalHeaderLabels(["场景", "开始时间", "结束时间"])
+        self.ui.tableWidget_2.setRowCount(3)  # 初始化三行
+
+        # 设置右键菜单
+        self.setup_context_menu()
+
+        # 允许用户直接在tableWidget_2表格中编辑数据
+        self.ui.tableWidget_2.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.AllEditTriggers)
+
+        # 当tableWidget_2的内容改变时，触发on_tableWidget_2_item_changed函数
+        self.ui.tableWidget_2.itemChanged.connect(self.on_tableWidget_2_item_changed)
+
+        # 当tableWidget的内容改变时，触发on_tableWidget_item_changed函数
+        self.ui.tableWidget.itemChanged.connect(self.on_tableWidget_item_changed)
 
         self.file_data = []  # 用于存储文件数据
+
+        # 打印初始的表格数据
+        self.time_data = self.get_tableWidget_2_data()
+        print(self.time_data)
+
+    def on_tableWidget_2_item_changed(self):
+        """当tableWidget_2的单元格内容更改时触发"""
+        self.time_data = self.get_tableWidget_2_data()
+        print("当前tableWidget_2中的数据：")
+        for row in self.time_data:
+            print(row)
+
+    def on_tableWidget_item_changed(self):
+        """当tableWidget的单元格内容更改时触发"""
+        self.file_data = self.get_tableWidget_data()
+        print("当前tableWidget中的数据：")
+        for row in self.file_data:
+            print(row)
 
     def open_files(self):
         filepaths, _ = QFileDialog.getOpenFileNames(self, "打开文件", "", "All Files (*)")
         if filepaths:
             self.display_file_paths(filepaths, is_true_value=False)
 
-
     def display_file_paths(self, file_paths, is_true_value):
+        """这个函数用来展示表格1中的数据, 并且将数据存储到self.file_data中"""
         for file_path in file_paths:
             row_position = self.ui.tableWidget.rowCount()
             self.ui.tableWidget.insertRow(row_position)
@@ -63,32 +95,104 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ui.tableWidget.resizeColumnsToContents()
 
-    def show_context_menu(self, position):
-        context_menu = QMenu()
-        delete_action = context_menu.addAction("删除")
-        action = context_menu.exec(self.ui.tableWidget.mapToGlobal(position))
+    def get_tableWidget_2_data(self):
+        """获取tableWidget_2的数据"""
+        table_data = []
+        row_count = self.ui.tableWidget_2.rowCount()
+        column_count = self.ui.tableWidget_2.columnCount()
+
+        for row in range(row_count):
+            row_data = []
+            for column in range(column_count):
+                item = self.ui.tableWidget_2.item(row, column)
+                if item is not None:
+                    row_data.append(item.text())
+                else:
+                    row_data.append('')  # 如果单元格为空，存储空字符串
+            table_data.append(row_data)
+
+        return table_data
+
+    def get_tableWidget_data(self):
+        """获取tableWidget的数据，包括QComboBox和QCheckBox的值"""
+        table_data = []
+        row_count = self.ui.tableWidget.rowCount()
+        column_count = self.ui.tableWidget.columnCount()
+
+        for row in range(row_count):
+            row_data = []
+            for column in range(column_count):
+                # 检查单元格是否有小部件（例如QComboBox或QCheckBox）
+                cell_widget = self.ui.tableWidget.cellWidget(row, column)
+
+                if isinstance(cell_widget, QComboBox):  # 如果是QComboBox
+                    row_data.append(cell_widget.currentText())
+                elif isinstance(cell_widget, QCheckBox):  # 如果是QCheckBox
+                    row_data.append(cell_widget.isChecked())
+                else:
+                    item = self.ui.tableWidget.item(row, column)
+                    if item is not None:
+                        row_data.append(item.text())
+                    else:
+                        row_data.append('')  # 如果单元格为空，存储空字符串
+            table_data.append(row_data)
+
+        return table_data
+
+    def setup_context_menu(self):
+        # 启用右键菜单
+        self.ui.tableWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.tableWidget_2.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+
+        # 连接右键菜单请求信号到槽函数
+        self.ui.tableWidget.customContextMenuRequested.connect(self.show_tableWidget_context_menu)
+        self.ui.tableWidget_2.customContextMenuRequested.connect(self.show_tableWidget_2_context_menu)
+
+    def show_tableWidget_context_menu(self, position):
+        # 创建tableWidget的右键菜单
+        menu = QMenu()
+        delete_action = menu.addAction("删除")
+        action = menu.exec(self.ui.tableWidget.mapToGlobal(position))
+
         if action == delete_action:
-            self.delete_selected_rows()
+            self.delete_selected_rows(self.ui.tableWidget)
 
-    def delete_selected_rows(self):
-        rows = sorted(set(index.row() for index in self.ui.tableWidget.selectedIndexes()), reverse=True)
+    def show_tableWidget_2_context_menu(self, position):
+        # 创建tableWidget_2的右键菜单
+        menu = QMenu()
+        add_action = menu.addAction("添加行")
+        delete_action = menu.addAction("删除")
+
+        action = menu.exec(self.ui.tableWidget_2.mapToGlobal(position))
+
+        if action == add_action:
+            self.add_new_row(self.ui.tableWidget_2)
+        elif action == delete_action:
+            self.delete_selected_rows(self.ui.tableWidget_2)
+
+    def delete_selected_rows(self, table_widget):
+        rows = sorted(set(index.row() for index in table_widget.selectedIndexes()), reverse=True)
         for row in rows:
-            self.ui.tableWidget.removeRow(row)
-            del self.file_data[row]
+            table_widget.removeRow(row)
+            if table_widget == self.ui.tableWidget:
+                del self.file_data[row]
 
-    def get_file_data(self):
-        data = []
-        for row, file_info in enumerate(self.file_data):
-            data.append({
-                'path': file_info['path'],
-                'format': file_info['format'].currentText(),
-                'frequency': file_info['frequency'].currentText(),
-                'is_true_value': file_info['is_true_value'].isChecked()
-            })
-        return data
+    def add_new_row(self, table_widget):
+        # 获取当前行数
+        row_position = table_widget.rowCount()
+
+        # 在最后一行添加新行
+        table_widget.insertRow(row_position)
+
+        if table_widget == self.ui.tableWidget_2:
+            # 可选：为新行设置默认的单元格内容
+            table_widget.setItem(row_position, 0, QTableWidgetItem(""))
+            table_widget.setItem(row_position, 1, QTableWidgetItem(""))
+            table_widget.setItem(row_position, 2, QTableWidgetItem(""))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+
