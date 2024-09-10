@@ -12,58 +12,188 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setWindowModality(QtCore.Qt.WindowModality.NonModal)
-        MainWindow.resize(800, 600)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum, QtWidgets.QSizePolicy.Policy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setMaximumSize(QtCore.QSize(800, 600))
-        MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonIconOnly)
+        MainWindow.resize(678, 677)
+        MainWindow.setStyleSheet("QMainWindow, QWidget {\n"
+"      background-color: #f5f5f5;\n"
+"      color: #333333;\n"
+"      font-family: \'Segoe UI\', Arial, sans-serif;\n"
+"    }\n"
+"    QTableWidget {\n"
+"      background-color: white;\n"
+"      gridline-color: #e0e0e0;\n"
+"      border: 1px solid #d0d0d0;\n"
+"      border-radius: 5px;\n"
+"    }\n"
+"    QHeaderView::section {\n"
+"      background-color: #e0e0e0;\n"
+"      padding: 5px;\n"
+"      border: none;\n"
+"      font-weight: bold;\n"
+"    }\n"
+"    QPushButton {\n"
+"      background-color: #2196F3;\n"
+"      color: white;\n"
+"      border: none;\n"
+"      padding: 8px 15px;\n"
+"      border-radius: 4px;\n"
+"      font-weight: bold;\n"
+"    }\n"
+"    QPushButton:hover {\n"
+"      background-color: #1976D2;\n"
+"    }\n"
+"    \n"
+"    /* Update for MenuBar and Menu */\n"
+"    QMenuBar {\n"
+"      background: transparent;  /* Make background transparent */\n"
+"      border: none;  /* Remove borders */\n"
+"      padding: 5px;\n"
+"    }\n"
+"    QMenuBar::item {\n"
+"      background-color: transparent;\n"
+"      padding: 5px 10px;\n"
+"      margin: 2px;\n"
+"      border-radius: 8px; /* Smooth rounded corners */\n"
+"    }\n"
+"    QMenuBar::item:selected {\n"
+"      background-color: #e0e0e0; /* Highlight on hover */\n"
+"    }\n"
+"    QMenuBar::item:pressed {\n"
+"      background-color: #cccccc;\n"
+"    }\n"
+"\n"
+"    QMenu {\n"
+"      background-color: white;\n"
+"      border: 1px solid #d0d0d0;\n"
+"      border-radius: 8px; /* Rounded corners */\n"
+"      padding: 5px;\n"
+"    }\n"
+"    QMenu::item {\n"
+"      padding: 5px 15px;\n"
+"      margin: 3px;\n"
+"      border-radius: 5px; /* Smooth rounded corners */\n"
+"    }\n"
+"    QMenu::item:selected {\n"
+"      background-color: #e0e0e0;\n"
+"    }")
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.pushButton = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(350, 500, 75, 24))
-        self.pushButton.setObjectName("pushButton")
-        self.tableWidget = QtWidgets.QTableWidget(parent=self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(0, 0, 431, 300))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
-        self.tableWidget.setSizePolicy(sizePolicy)
-        self.tableWidget.setMinimumSize(QtCore.QSize(0, 0))
-        self.tableWidget.setMaximumSize(QtCore.QSize(800, 300))
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.titleLabel = QtWidgets.QLabel(parent=self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(18)
+        font.setBold(True)
+        self.titleLabel.setFont(font)
+        self.titleLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.titleLabel.setObjectName("titleLabel")
+        self.verticalLayout.addWidget(self.titleLabel)
+        self.splitter = QtWidgets.QSplitter(parent=self.centralwidget)
+        self.splitter.setOrientation(QtCore.Qt.Orientation.Vertical)
+        self.splitter.setObjectName("splitter")
+        self.topWidget = QtWidgets.QWidget(parent=self.splitter)
+        self.topWidget.setObjectName("topWidget")
+        self.topLayout = QtWidgets.QVBoxLayout(self.topWidget)
+        self.topLayout.setContentsMargins(0, 0, 0, 0)
+        self.topLayout.setObjectName("topLayout")
+        self.fileLabel = QtWidgets.QLabel(parent=self.topWidget)
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(14)
+        font.setBold(True)
+        self.fileLabel.setFont(font)
+        self.fileLabel.setObjectName("fileLabel")
+        self.topLayout.addWidget(self.fileLabel)
+        self.tableWidget = QtWidgets.QTableWidget(parent=self.topWidget)
+        self.tableWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.AllEditTriggers)
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setColumnCount(4)
         self.tableWidget.setRowCount(0)
-        self.tableWidget_2 = QtWidgets.QTableWidget(parent=self.centralwidget)
-        self.tableWidget_2.setGeometry(QtCore.QRect(429, 0, 371, 300))
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(3, item)
+        self.topLayout.addWidget(self.tableWidget)
+        self.bottomWidget = QtWidgets.QWidget(parent=self.splitter)
+        self.bottomWidget.setObjectName("bottomWidget")
+        self.bottomLayout = QtWidgets.QVBoxLayout(self.bottomWidget)
+        self.bottomLayout.setContentsMargins(0, 0, 0, 0)
+        self.bottomLayout.setObjectName("bottomLayout")
+        self.sceneLabel = QtWidgets.QLabel(parent=self.bottomWidget)
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(14)
+        font.setBold(True)
+        self.sceneLabel.setFont(font)
+        self.sceneLabel.setObjectName("sceneLabel")
+        self.bottomLayout.addWidget(self.sceneLabel)
+        self.tableWidget_2 = QtWidgets.QTableWidget(parent=self.bottomWidget)
+        self.tableWidget_2.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tableWidget_2.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.AllEditTriggers)
+        self.tableWidget_2.setRowCount(3)
         self.tableWidget_2.setObjectName("tableWidget_2")
-        self.tableWidget_2.setColumnCount(0)
-        self.tableWidget_2.setRowCount(0)
+        self.tableWidget_2.setColumnCount(3)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_2.setHorizontalHeaderItem(2, item)
+        self.bottomLayout.addWidget(self.tableWidget_2)
+        self.verticalLayout.addWidget(self.splitter)
+        self.pushButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.pushButton)
         MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 678, 41))
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(parent=self.menubar)
         self.menu.setObjectName("menu")
+        self.menu_2 = QtWidgets.QMenu(parent=self.menubar)
+        self.menu_2.setObjectName("menu_2")
         MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
         self.action_file = QtGui.QAction(parent=MainWindow)
         self.action_file.setObjectName("action_file")
+        self.actionccc = QtGui.QAction(parent=MainWindow)
+        self.actionccc.setObjectName("actionccc")
         self.menu.addAction(self.action_file)
+        self.menu_2.addAction(self.actionccc)
         self.menubar.addAction(self.menu.menuAction())
+        self.menubar.addAction(self.menu_2.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "导航数据处理"))
+        self.titleLabel.setText(_translate("MainWindow", "导航数据处理"))
+        self.fileLabel.setText(_translate("MainWindow", "文件信息"))
+        item = self.tableWidget.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "文件名"))
+        item = self.tableWidget.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "文件格式"))
+        item = self.tableWidget.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "频率"))
+        item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "真值文件"))
+        self.sceneLabel.setText(_translate("MainWindow", "场景信息"))
+        item = self.tableWidget_2.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "场景"))
+        item = self.tableWidget_2.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "开始时间"))
+        item = self.tableWidget_2.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "结束时间"))
         self.pushButton.setText(_translate("MainWindow", "计算误差"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
+        self.menu_2.setTitle(_translate("MainWindow", "报告"))
         self.action_file.setText(_translate("MainWindow", "打开数据"))
+        self.actionccc.setText(_translate("MainWindow", "生成报告"))
