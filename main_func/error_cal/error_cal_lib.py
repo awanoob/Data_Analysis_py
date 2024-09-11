@@ -72,7 +72,7 @@ def syserr_cal_alg(data: np.ndarray) -> np.ndarray:
 
 def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
     syserr = {"x": 0, "y": 0, "alt": 0, "roll": 0, "pitch": 0, "heading": 0}
-    fix_ratio = np.count_nonzero(postype == 1)/len(postype)
+    fix_ratio = np.count_nonzero(postype == 1) / len(postype)
     syserr_set2zero = 1 if fix_ratio < 0.2 else 0
     if syserr_set2zero:
         print("Fix ratio is too low, cannot calculate system error.\n")

@@ -12,20 +12,20 @@ def decode_navplot(data_path: str) -> np.ndarray:
     file_matrix = np.genfromtxt(data_path, delimiter=None, encoding='utf-8')
     # 将特定列的数据提取出来，组成新的数据矩阵
     data_matrix = np.zeros((file_matrix.shape[0], 24))
-    data_matrix[:, 0] = file_matrix[:, 0]
-    data_matrix[:, 1] = file_matrix[:, 1]
-    data_matrix[:, 2] = file_matrix[:, 2]
-    data_matrix[:, 3] = file_matrix[:, 3]
-    data_matrix[:, 4] = file_matrix[:, 4]
-    data_matrix[:, 5] = file_matrix[:, 15]
-    data_matrix[:, 6] = file_matrix[:, 16]
-    data_matrix[:, 7] = file_matrix[:, 17]
-    data_matrix[:, 8] = file_matrix[:, 18]
-    data_matrix[:, 9] = file_matrix[:, 19]
-    data_matrix[:, 10] = file_matrix[:, 20]
-    data_matrix[:, 11] = file_matrix[:, 5]
-    data_matrix[:, 12] = file_matrix[:, 14]
-    data_matrix[:, 13] = file_matrix[:, 6]
+    data_matrix[:, [0]] = file_matrix[:, [0]]
+    data_matrix[:, [1]] = file_matrix[:, [1]]
+    data_matrix[:, [2]] = file_matrix[:, [2]]
+    data_matrix[:, [3]] = file_matrix[:, [3]]
+    data_matrix[:, [4]] = file_matrix[:, [4]]
+    data_matrix[:, [5]] = file_matrix[:, [15]]
+    data_matrix[:, [6]] = file_matrix[:, [16]]
+    data_matrix[:, [7]] = file_matrix[:, [17]]
+    data_matrix[:, [8]] = file_matrix[:, [18]]
+    data_matrix[:, [9]] = file_matrix[:, [19]]
+    data_matrix[:, [10]] = file_matrix[:, [20]]
+    data_matrix[:, [11]] = file_matrix[:, [5]]
+    data_matrix[:, [12]] = file_matrix[:, [14]]
+    data_matrix[:, [13]] = file_matrix[:, [6]]
     return data_matrix
 
 

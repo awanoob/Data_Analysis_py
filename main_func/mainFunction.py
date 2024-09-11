@@ -46,9 +46,9 @@ def mainFunc(input_cfg: dict):
             pack_lost_chk(array_test_ori, input_cfg['data_frq_list'][i], itv_chk_report_path)
 
         # 匹配相同时间戳的行
-        indx_common = np.intersect1d(array_bchmk_ori[:, 1], array_test_ori[:, 1])
-        array_bchmk = array_bchmk_ori[np.isin(array_bchmk_ori[:, 1], indx_common)]
-        array_test = array_test_ori[np.isin(array_test_ori[:, 1], indx_common)]
+        indx_common = np.intersect1d(array_bchmk_ori[:, [1]], array_test_ori[:, [1]])
+        array_bchmk = array_bchmk_ori[np.isin(array_bchmk_ori[:, [1]], indx_common)]
+        array_test = array_test_ori[np.isin(array_test_ori[:, [1]], indx_common)]
         # 计算误差
         errlist = err_cal_func(array_bchmk, array_test, input_cfg)
         multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
