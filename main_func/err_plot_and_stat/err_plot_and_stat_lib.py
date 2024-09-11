@@ -37,7 +37,7 @@ def fig_plt(xaxis: np.ndarray, yaxis_list, title: list, xlabel: str, ylabel: str
 
 
 def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.ndarray:
-    if input_cfg['output_fig']: 
+    if input_cfg['output_fig']:
         # 生成场景误差时间图像
         fig_xy_path = join(path_scene, f'{scene_name}_xy.png')
         fig_pos_alt_path = join(path_scene, f'{scene_name}_pos_alt.png')
@@ -110,7 +110,11 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
     return L_scn
 
 
-def dr_err_stat():
+def dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg):
+    turnel_t = errlist_scn[-1, 1] - errlist_scn[0, 1]
+    turnel_dis = errlist_scn[-1, 12] - errlist_scn[0, 12]
+    dr_err_time = {'30s': 0, '60s': 0, '120s': 0}
+    dr_err_dis = {'0.5km': 0, '1km': 0, '2km': 0}
     pass
 
 

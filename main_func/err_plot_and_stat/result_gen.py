@@ -63,12 +63,13 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
             L_fix_all = np.vstack((L_fix_all, L_fix_scn))
             L_float_all = np.vstack((L_float_all, L_float_scn))    
 
-        # 判断是否为隧道场景，并输出单场景DR误差统计，隧道场景特征为测试数据的搜星数为0的占比大于0.75
-        # 如果没有搜星数这个字段咋办？
-        if np.count_nonzero(array_test_scn[:, [13]] == 0) / len(array_test_scn) <= 0.25:
-
+        # 判断是否为隧道场景，并输出单场景DR误差统计
+        if '隧道' in scene_name:
+            path_dr_stat = join(path_scene, 'dr_stat')
+            if not exists(path_dr_stat):
+                makedirs(path_dr_stat)
             errlist_scn = errlist[np.where((array_bchmk[:, [1]] >= start_t) & (array_bchmk[:, [1]] < end_t + 30))[0]]
-            dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg)
+            dr_err_stat(errlist_scn, path_dr_stat, scene_name, input_cfg)
 
     # 将ndarray转换为DataFrame
     L_all = pd.DataFrame(L_all)
