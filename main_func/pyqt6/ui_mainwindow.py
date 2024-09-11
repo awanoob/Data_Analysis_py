@@ -12,103 +12,41 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(678, 677)
-        MainWindow.setStyleSheet("QMainWindow, QWidget {\n"
-"      background-color: #f5f5f5;\n"
-"      color: #333333;\n"
-"      font-family: \'Segoe UI\', Arial, sans-serif;\n"
-"    }\n"
-"    QTableWidget {\n"
-"      background-color: white;\n"
-"      gridline-color: #e0e0e0;\n"
-"      border: 1px solid #d0d0d0;\n"
-"      border-radius: 5px;\n"
-"    }\n"
-"    QHeaderView::section {\n"
-"      background-color: #e0e0e0;\n"
-"      padding: 5px;\n"
-"      border: none;\n"
-"      font-weight: bold;\n"
-"    }\n"
-"    QPushButton {\n"
-"      background-color: #2196F3;\n"
-"      color: white;\n"
-"      border: none;\n"
-"      padding: 8px 15px;\n"
-"      border-radius: 4px;\n"
-"      font-weight: bold;\n"
-"    }\n"
-"    QPushButton:hover {\n"
-"      background-color: #1976D2;\n"
-"    }\n"
-"    \n"
-"    /* Update for MenuBar and Menu */\n"
-"    QMenuBar {\n"
-"      background: transparent;  /* Make background transparent */\n"
-"      border: none;  /* Remove borders */\n"
-"      padding: 5px;\n"
-"    }\n"
-"    QMenuBar::item {\n"
-"      background-color: transparent;\n"
-"      padding: 5px 10px;\n"
-"      margin: 2px;\n"
-"      border-radius: 8px; /* Smooth rounded corners */\n"
-"    }\n"
-"    QMenuBar::item:selected {\n"
-"      background-color: #e0e0e0; /* Highlight on hover */\n"
-"    }\n"
-"    QMenuBar::item:pressed {\n"
-"      background-color: #cccccc;\n"
-"    }\n"
-"\n"
-"    QMenu {\n"
-"      background-color: white;\n"
-"      border: 1px solid #d0d0d0;\n"
-"      border-radius: 8px; /* Rounded corners */\n"
-"      padding: 5px;\n"
-"    }\n"
-"    QMenu::item {\n"
-"      padding: 5px 15px;\n"
-"      margin: 3px;\n"
-"      border-radius: 5px; /* Smooth rounded corners */\n"
-"    }\n"
-"    QMenu::item:selected {\n"
-"      background-color: #e0e0e0;\n"
-"    }")
+        MainWindow.resize(900, 700)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.titleLabel = QtWidgets.QLabel(parent=self.centralwidget)
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
-        font.setPointSize(18)
+        font.setFamily("-apple-system")
+        font.setPointSize(16)
         font.setBold(True)
         self.titleLabel.setFont(font)
         self.titleLabel.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.titleLabel.setObjectName("titleLabel")
         self.verticalLayout.addWidget(self.titleLabel)
-        self.splitter = QtWidgets.QSplitter(parent=self.centralwidget)
-        self.splitter.setOrientation(QtCore.Qt.Orientation.Vertical)
-        self.splitter.setObjectName("splitter")
-        self.topWidget = QtWidgets.QWidget(parent=self.splitter)
-        self.topWidget.setObjectName("topWidget")
-        self.topLayout = QtWidgets.QVBoxLayout(self.topWidget)
-        self.topLayout.setContentsMargins(0, 0, 0, 0)
-        self.topLayout.setObjectName("topLayout")
-        self.fileLabel = QtWidgets.QLabel(parent=self.topWidget)
+        self.splitter_vertical = QtWidgets.QSplitter(parent=self.centralwidget)
+        self.splitter_vertical.setOrientation(QtCore.Qt.Orientation.Vertical)
+        self.splitter_vertical.setObjectName("splitter_vertical")
+        self.tableWidgetWrapper = QtWidgets.QWidget(parent=self.splitter_vertical)
+        self.tableWidgetWrapper.setObjectName("tableWidgetWrapper")
+        self.tableLayout = QtWidgets.QVBoxLayout(self.tableWidgetWrapper)
+        self.tableLayout.setContentsMargins(0, 0, 0, 0)
+        self.tableLayout.setObjectName("tableLayout")
+        self.fileLabel = QtWidgets.QLabel(parent=self.tableWidgetWrapper)
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
-        font.setPointSize(14)
+        font.setFamily("-apple-system")
+        font.setPointSize(12)
         font.setBold(True)
         self.fileLabel.setFont(font)
         self.fileLabel.setObjectName("fileLabel")
-        self.topLayout.addWidget(self.fileLabel)
-        self.tableWidget = QtWidgets.QTableWidget(parent=self.topWidget)
+        self.tableLayout.addWidget(self.fileLabel)
+        self.tableWidget = QtWidgets.QTableWidget(parent=self.tableWidgetWrapper)
         self.tableWidget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.AllEditTriggers)
-        self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(4)
+        self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -118,21 +56,33 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(3, item)
-        self.topLayout.addWidget(self.tableWidget)
-        self.bottomWidget = QtWidgets.QWidget(parent=self.splitter)
-        self.bottomWidget.setObjectName("bottomWidget")
-        self.bottomLayout = QtWidgets.QVBoxLayout(self.bottomWidget)
-        self.bottomLayout.setContentsMargins(0, 0, 0, 0)
-        self.bottomLayout.setObjectName("bottomLayout")
-        self.sceneLabel = QtWidgets.QLabel(parent=self.bottomWidget)
+        self.tableLayout.addWidget(self.tableWidget)
+        self.splitterWrapper = QtWidgets.QWidget(parent=self.splitter_vertical)
+        self.splitterWrapper.setObjectName("splitterWrapper")
+        self.splitterLayout = QtWidgets.QVBoxLayout(self.splitterWrapper)
+        self.splitterLayout.setContentsMargins(0, 0, 0, 0)
+        self.splitterLayout.setObjectName("splitterLayout")
+        self.splitter = QtWidgets.QSplitter(parent=self.splitterWrapper)
+        self.splitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.splitter.setObjectName("splitter")
+        self.leftWidget = QtWidgets.QWidget(parent=self.splitter)
+        self.leftWidget.setObjectName("leftWidget")
+        self.leftLayout = QtWidgets.QVBoxLayout(self.leftWidget)
+        self.leftLayout.setContentsMargins(0, 0, 0, 0)
+        self.leftLayout.setObjectName("leftLayout")
+        self.sceneLabel = QtWidgets.QLabel(parent=self.leftWidget)
         font = QtGui.QFont()
-        font.setFamily("Segoe UI")
-        font.setPointSize(14)
+        font.setFamily("-apple-system")
+        font.setPointSize(12)
         font.setBold(True)
         self.sceneLabel.setFont(font)
         self.sceneLabel.setObjectName("sceneLabel")
-        self.bottomLayout.addWidget(self.sceneLabel)
-        self.tableWidget_2 = QtWidgets.QTableWidget(parent=self.bottomWidget)
+        self.leftLayout.addWidget(self.sceneLabel)
+        self.tableWidget_2 = QtWidgets.QTableWidget(parent=self.leftWidget)
+        font = QtGui.QFont()
+        font.setFamily("-apple-system")
+        font.setPointSize(10)
+        self.tableWidget_2.setFont(font)
         self.tableWidget_2.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.tableWidget_2.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.AllEditTriggers)
         self.tableWidget_2.setRowCount(3)
@@ -144,14 +94,41 @@ class Ui_MainWindow(object):
         self.tableWidget_2.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget_2.setHorizontalHeaderItem(2, item)
-        self.bottomLayout.addWidget(self.tableWidget_2)
-        self.verticalLayout.addWidget(self.splitter)
-        self.pushButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.leftLayout.addWidget(self.tableWidget_2)
+        self.rightWidget = QtWidgets.QWidget(parent=self.splitter)
+        self.rightWidget.setObjectName("rightWidget")
+        self.rightLayout = QtWidgets.QVBoxLayout(self.rightWidget)
+        self.rightLayout.setContentsMargins(0, 0, 0, 0)
+        self.rightLayout.setObjectName("rightLayout")
+        self.sceneLabel_2 = QtWidgets.QLabel(parent=self.rightWidget)
+        font = QtGui.QFont()
+        font.setFamily("-apple-system")
+        font.setPointSize(12)
+        font.setBold(True)
+        self.sceneLabel_2.setFont(font)
+        self.sceneLabel_2.setObjectName("sceneLabel_2")
+        self.rightLayout.addWidget(self.sceneLabel_2)
+        self.logTextEdit = QtWidgets.QTextEdit(parent=self.rightWidget)
+        font = QtGui.QFont()
+        font.setFamily("-apple-system")
+        font.setPointSize(10)
+        self.logTextEdit.setFont(font)
+        self.logTextEdit.setReadOnly(True)
+        self.logTextEdit.setObjectName("logTextEdit")
+        self.rightLayout.addWidget(self.logTextEdit)
+        self.progressBar = QtWidgets.QProgressBar(parent=self.rightWidget)
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setTextVisible(True)
+        self.progressBar.setObjectName("progressBar")
+        self.rightLayout.addWidget(self.progressBar)
+        self.pushButton = QtWidgets.QPushButton(parent=self.rightWidget)
         self.pushButton.setObjectName("pushButton")
-        self.verticalLayout.addWidget(self.pushButton)
+        self.rightLayout.addWidget(self.pushButton)
+        self.splitterLayout.addWidget(self.splitter)
+        self.verticalLayout.addWidget(self.splitter_vertical)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 678, 41))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 900, 22))
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(parent=self.menubar)
         self.menu.setObjectName("menu")
@@ -161,12 +138,12 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.action_file = QtGui.QAction(parent=MainWindow)
-        self.action_file.setObjectName("action_file")
-        self.actionccc = QtGui.QAction(parent=MainWindow)
-        self.actionccc.setObjectName("actionccc")
-        self.menu.addAction(self.action_file)
-        self.menu_2.addAction(self.actionccc)
+        self.action_open = QtGui.QAction(parent=MainWindow)
+        self.action_open.setObjectName("action_open")
+        self.action_generate_report = QtGui.QAction(parent=MainWindow)
+        self.action_generate_report.setObjectName("action_generate_report")
+        self.menu.addAction(self.action_open)
+        self.menu_2.addAction(self.action_generate_report)
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
 
@@ -175,6 +152,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "导航数据处理"))
         self.titleLabel.setText(_translate("MainWindow", "导航数据处理"))
         self.fileLabel.setText(_translate("MainWindow", "文件信息"))
         item = self.tableWidget.horizontalHeaderItem(0)
@@ -192,8 +170,12 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "开始时间"))
         item = self.tableWidget_2.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "结束时间"))
+        self.sceneLabel_2.setText(_translate("MainWindow", "日志输出"))
+        self.logTextEdit.setPlaceholderText(_translate("MainWindow", "日志输出..."))
         self.pushButton.setText(_translate("MainWindow", "计算误差"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.menu_2.setTitle(_translate("MainWindow", "报告"))
-        self.action_file.setText(_translate("MainWindow", "打开数据"))
-        self.actionccc.setText(_translate("MainWindow", "生成报告"))
+        self.action_open.setText(_translate("MainWindow", "打开数据"))
+        self.action_open.setShortcut(_translate("MainWindow", "Ctrl+O"))
+        self.action_generate_report.setText(_translate("MainWindow", "生成报告"))
+        self.action_generate_report.setShortcut(_translate("MainWindow", "Ctrl+R"))
