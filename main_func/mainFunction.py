@@ -38,7 +38,7 @@ def mainFunc(input_cfg: dict):
                 output_navplot(array_test_ori, nav_output_path_test)
 
         # 检查数据丢包
-        if input_cfg['data_frq_truth'] is not None:
+        if input_cfg['data_frq_truth'] is not None and i == 0:
             itv_chk_report_path = join(input_cfg['path_proj'], 'itv_chk_report_bchmk.txt')
             pack_lost_chk(array_bchmk_ori, input_cfg['data_frq_truth'], itv_chk_report_path)
         if input_cfg['data_frq_list'][i] is not None:

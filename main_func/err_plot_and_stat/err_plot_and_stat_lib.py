@@ -1,7 +1,11 @@
 import matplotlib
 import matplotlib.pyplot as plt
-from os.path import join
+from os.path import join, exists
+from os import makedirs
 import numpy as np
+
+# matlab color lib
+color_lib = {'dark_blue': '#0072BD', 'orange': '#D95319', 'yellow': '#EDB120', 'purple': '#7E2F8E', 'green': '#77AC30', 'light_blue': '#4DBEEE', 'red': '#A2142F', 'black': '#000000'}
 
 
 def sigma(err: np.ndarray, input_cfg) -> dict:
@@ -24,16 +28,22 @@ def sigma(err: np.ndarray, input_cfg) -> dict:
     return sig_count
 
 
-def fig_plt(xaxis: np.ndarray, yaxis_list, title: list, xlabel: str, ylabel: str, fig_path: str):
+def fig_plt(xaxis: np.ndarray, yaxis_list, title: list, xlabel: str, ylabel: str, fig_path: str, *args: list, **kwargs):
     i = len(yaxis_list)
     fig, ax = plt.subplots(i, 1, figsize=(19.2, 10.8))
-    for i in range(len(yaxis_list)):
-        ax[i].plot(xaxis, yaxis_list[i], color='#0072BD')
+    for i, yaxis_idct in enumerate(yaxis_list):
+        for yaxis_dev, color_inturn in zip(yaxis_idct, color_lib.values()):
+            ax[i].plot(xaxis, yaxis_dev, color=color_inturn)
         ax[i].set_title(title[i], fontsize=16)
         ax[i].set_xlabel(xlabel, fontsize=14)
         ax[i].set_ylabel(ylabel, fontsize=14)
         ax[i].grid(color='lightgray', linestyle='-', linewidth=0.5)
+        if len(kwargs) > 0 and kwargs['is_multiplot']:
+            ax[i].legend(args[0])
     fig.savefig(fig_path, dpi=300, bbox_inches='tight', format='png')
+
+
+def cal_err_with_ev()
 
 
 def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.ndarray:
@@ -43,10 +53,10 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
         fig_pos_alt_path = join(path_scene, f'{scene_name}_pos_alt.png')
         fig_vel_path = join(path_scene, f'{scene_name}_vel.png')
         fig_att_path = join(path_scene, f'{scene_name}_att.png')
-        fig_plt(errlist_scn[:, [1]], [errlist_scn[:, [2]], errlist_scn[:, [3]]], ['横向误差', '纵向误差'], 'Time/s', '/m', fig_xy_path)
-        fig_plt(errlist_scn[:, [1]], [errlist_scn[:, [11]], errlist_scn[:, [4]]], ['水平误差', '高程误差'], 'Time/s', '/m', fig_pos_alt_path)
-        fig_plt(errlist_scn[:, [1]], [errlist_scn[:, [5]], errlist_scn[:, [6]], errlist_scn[:, [7]]], ['ve误差', 'vn误差', 'vu误差'], 'Time/s', '/(m/s)', fig_vel_path)
-        fig_plt(errlist_scn[:, [1]], [errlist_scn[:, [8]], errlist_scn[:, [9]], errlist_scn[:, [10]]], ['横滚角误差', '俯仰角误差', '航向角误差'], 'Time/s', '/°', fig_att_path)
+        fig_plt(errlist_scn[:, [1]], [[errlist_scn[:, [2]]], [errlist_scn[:, [3]]]], ['横向误差', '纵向误差'], 'Time/s', '/m', fig_xy_path)
+        fig_plt(errlist_scn[:, [1]], [[errlist_scn[:, [11]]], [errlist_scn[:, [4]]]], ['水平误差', '高程误差'], 'Time/s', '/m', fig_pos_alt_path)
+        fig_plt(errlist_scn[:, [1]], [[errlist_scn[:, [5]]], [errlist_scn[:, [6]]], [errlist_scn[:, [7]]]], ['ve误差', 'vn误差', 'vu误差'], 'Time/s', '/(m/s)', fig_vel_path)
+        fig_plt(errlist_scn[:, [1]], [[errlist_scn[:, [8]]], [errlist_scn[:, [9]]], [errlist_scn[:, [10]]]], ['横滚角误差', '俯仰角误差', '航向角误差'], 'Time/s', '/°', fig_att_path)
 
     # 计算统计量
     RMS = {
@@ -111,15 +121,60 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
 
 
 def dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg):
-    turnel_t = errlist_scn[-1, 1] - errlist_scn[0, 1]
-    turnel_dis = errlist_scn[-1, 12] - errlist_scn[0, 12]
-    dr_err_time = {'30s': 0, '60s': 0, '120s': 0}
-    dr_err_dis = {'0.5km': 0, '1km': 0, '2km': 0}
+    # 获取减去30s的时间作为出隧道时间
+    turnel_t = errlist_scn[-1, 1] - errlist_scn[0, 1] - 30
+    # 获取30s前的索引值，来获取出隧道时的行驶距离
+    turnel_index = np.searchsorted(errlist_scn[:, 1], turnel_t, side='right') - 1
+
+    turnel_dis = errlist_scn[turnel_index, 12] - errlist_scn[0, 12]
+    # 时间特征值
+    ev_time = ['10s', '30s', '60s', '120s']
+    # 距离特征值
+    ev_dis = ['0.5km', '1km', '2km']
+    # dr_err_time_max = {'10s': 0, '30s': 0, '60s': 0, '120s': 0}
+    # dr_err_dis_max = {'0.5km': 0, '1km': 0, '2km': 0}
+    
     pass
 
 
-def multi_dev_err_plot():
-    pass
+def multi_dev_err_plot(err_dict, input_cfg):
+    # err_dict: {'dev1': errlist1, 'dev2': errlist2, ...}
+
+    path_multiplt = join(input_cfg['path_proj'], 'multi_dev_err_plot')
+    if not exists(path_multiplt):
+        makedirs(path_multiplt)
+    for i in range(len(input_cfg['era_list']['Scene'])):
+        # 获取场景名称和时间段
+        scene_name = input_cfg['era_list']['Scene'][i]
+        start_t_list = input_cfg['era_list']['start_time'][i]
+        end_t_list = input_cfg['era_list']['end_time'][i]
+
+        # 生成场景子路径
+        path_scene = join(path_multiplt, scene_name)
+        if not exists(path_scene):
+            makedirs(path_scene)
+
+        err_dict_scn = {k: np.array([]) for k in input_cfg['dev_name_list']}
+
+        # 按照开始时间和结束时间划分数据
+        for j in range(len(start_t_list)):
+            start_t = start_t_list[j]
+            end_t = end_t_list[j]
+                
+            for k in input_cfg['dev_name_list']:
+                time_list = err_dict[k][:, 1]
+                indx = np.where((time_list >= start_t) & (time_list < end_t))[0]
+                err_dict_scn[k] = np.vstack((err_dict_scn[k], err_dict[k][indx]))
+
+        # 生成多设备误差对比图
+        fig_xy_path = join(path_scene, f'{scene_name}_xy.png')
+        fig_pos_alt_path = join(path_scene, f'{scene_name}_pos_alt.png')
+        fig_vel_path = join(path_scene, f'{scene_name}_vel.png')
+        fig_att_path = join(path_scene, f'{scene_name}_att.png')
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [2]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [3]] for k in input_cfg['dev_name_list']]], ['横向误差', '纵向误差'], 'Time/s', '/m', fig_xy_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [11]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [4]] for k in input_cfg['dev_name_list']]], ['水平误差', '高程误差'], 'Time/s', '/m', fig_pos_alt_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [5]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [6]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [7]] for k in input_cfg['dev_name_list']]], ['ve误差', 'vn误差', 'vu误差'], 'Time/s', '/(m/s)', fig_vel_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [8]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [9]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [10]] for k in input_cfg['dev_name_list']]], ['横滚角误差', '俯仰角误差', '航向角误差'], 'Time/s', '/°', fig_att_path, input_cfg['dev_name_list'], is_multiplot=True)
 
 
 __all__ = ['err_time_plot_stat', 'dr_err_stat', 'multi_dev_err_plot']
