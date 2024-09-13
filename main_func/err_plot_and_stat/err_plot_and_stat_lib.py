@@ -43,7 +43,18 @@ def fig_plt(xaxis: np.ndarray, yaxis_list, title: list, xlabel: str, ylabel: str
     fig.savefig(fig_path, dpi=300, bbox_inches='tight', format='png')
 
 
-def cal_err_with_ev()
+def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.ndarray) -> dict:
+    # 时间特征值
+    ev_time_key = ['10s', '30s', '60s', '120s']
+    ev_time = [10, 30, 60, 120]
+    # 距离特征值
+    ev_dis_key = ['0.5km', '1km', '2km']
+    ev_dis = [500, 1000, 2000]
+
+    dr_time_dict = {k: 0 for k in ev_time_key}
+    dr_dis_dict = {k: 0 for k in ev_dis_key}
+    
+    
 
 
 def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.ndarray:
@@ -127,12 +138,20 @@ def dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg):
     turnel_index = np.searchsorted(errlist_scn[:, 1], turnel_t, side='right') - 1
 
     turnel_dis = errlist_scn[turnel_index, 12] - errlist_scn[0, 12]
-    # 时间特征值
-    ev_time = ['10s', '30s', '60s', '120s']
-    # 距离特征值
-    ev_dis = ['0.5km', '1km', '2km']
     # dr_err_time_max = {'10s': 0, '30s': 0, '60s': 0, '120s': 0}
     # dr_err_dis_max = {'0.5km': 0, '1km': 0, '2km': 0}
+    dr_err_time_x_dict, dr_err_dis_x_dict= 
+    dr_err_time_y_dict, dr_err_dis_y_dict
+    dr_err_time_alt_dict, dr_err_dis_alt_dict
+    dr_err_time_pos_dict, dr_err_dis_pos_dict
+    dr_err_time_ve_dict, dr_err_dis_ve_dict
+    dr_err_time_vn_dict, dr_err_dis_vn_dict
+    dr_err_time_vu_dict, dr_err_dis_vu_dict
+    dr_err_time_roll_dict, dr_err_dis_roll_dict
+    dr_err_time_pitch_dict, dr_err_dis_pitch_dict
+    dr_err_time_heading_dict, dr_err_dis_heading_dict
+    
+
     
     pass
 
