@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QComboBox, QCheckBox,
     QHeaderView, QProgressBar
 from PyQt6.QtCore import Qt
 from ui_mainwindow import Ui_MainWindow
+from ui_selectreport import Ui_SelectReport
 
 
 class QTextEditLogger(logging.Handler):
@@ -29,6 +30,20 @@ class CenteredCheckBox(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
+from PyQt6.QtWidgets import QDialog
+
+class SelectReportDialog(QDialog):
+    def __init__(self, parent=None):
+        super(SelectReportDialog, self).__init__(parent)
+        self.ui = Ui_SelectReport()  # 这里实例化的是 Ui_SelectReport
+        self.ui.setupUi(self)  # 使用 setupUi 来加载设计的界面布局
+
+def open_select_report_dialog(self):
+    dialog = SelectReportDialog(self)  # 创建 SelectReportDialog 实例
+    dialog.exec()  # 以模态方式打开子界面
+
+
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -48,6 +63,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # 设置右键菜单
         self.setup_context_menu()
 
+        # 绑定生成报告动作
+        self.ui.action_generate_report.triggered.connect(self.open_select_report_dialog)
+
         # 连接信号
         self.ui.tableWidget_2.itemChanged.connect(self.on_tableWidget_2_item_changed)
         self.ui.tableWidget.itemChanged.connect(self.on_tableWidget_item_changed)
@@ -61,6 +79,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.file_data = []
         self.time_data = self.get_tableWidget_2_data()
+
+    def open_select_report_dialog(self):
+        dialog = SelectReportDialog(self)  # 实例化子界面
+        dialog.exec()  # 显示子界面
 
     def load_stylesheet(self):
         """加载样式表"""

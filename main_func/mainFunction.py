@@ -43,6 +43,7 @@ def mainFunc(yaml_path: str):
         if input_cfg['data_frq_truth'] is not None and i == 0:
             itv_chk_report_path = join(input_cfg['path_proj'], 'itv_chk_report_bchmk.txt')
             pack_lost_chk(array_bchmk_ori, input_cfg['data_frq_truth'], itv_chk_report_path)
+
         if input_cfg['data_frq_list'][i] != '':
             itv_chk_report_path = join(path_proj_dev, 'itv_chk_report_test.txt')
             pack_lost_chk(array_test_ori, input_cfg['data_frq_list'][i], itv_chk_report_path)
@@ -60,6 +61,7 @@ def mainFunc(yaml_path: str):
         array_test = array_test_ori[index_common_bool_test, :]
         # 计算误差
         errlist = err_cal_func(array_bchmk, array_test, input_cfg)
+
         if multi_dev_err_dict in locals():
             multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
 
