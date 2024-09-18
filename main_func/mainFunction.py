@@ -4,7 +4,7 @@
 # Version: 0.1
 # Description: This function is the main function of the project. It is used to call other functions in the project.
 # Input: input_cfg: dict, the configuration of the project
-from os.path import basename, join, exists
+from os.path import join, exists
 from os import makedirs
 import numpy as np
 from data_read_and_decode.data_rnd_lib import *
