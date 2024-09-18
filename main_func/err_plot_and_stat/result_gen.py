@@ -40,10 +40,10 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
         output_navplot(array_test_scn, join(path_scene, f"{scene_name}_test.navplot"))
 
         # 输出单场景误差时间图像和统计报告
-        path_fig_stat = join(path_scene, 'fig_stat')
-        if not exists(path_fig_stat):
-            makedirs(path_fig_stat)
-        L_scn = err_time_plot_stat(errlist_scn, path_fig_stat, scene_name, input_cfg)
+        path_fig = join(path_scene, 'fig')
+        if not exists(path_fig):
+            makedirs(path_fig)
+        L_scn = err_time_plot_stat(errlist_scn, path_fig, scene_name, input_cfg)
         L_all = np.vstack((L_all, L_scn))
 
         # 输出单场景固定解，浮动解误差时间图像和统计报告
@@ -53,13 +53,13 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
             L_float_scn = np.empty((0, 14))
             L_float_all = np.vstack((L_float_all, L_float_scn))
         else:
-            path_ff_fig_stat = join(path_scene, 'ff_fig_stat')
-            if not exists(path_ff_fig_stat):
-                makedirs(path_ff_fig_stat)
+            path_ff_fig = join(path_scene, 'ff_fig')
+            if not exists(path_ff_fig):
+                makedirs(path_ff_fig)
             errlist_fix_scn = errlist_scn[np.where(errlist_scn[:, [13]] == 1)[0]]
             errlist_float_scn = errlist_scn[np.where(errlist_scn[:, [13]] == 2)[0]]
-            L_fix_scn = err_time_plot_stat(errlist_fix_scn, path_ff_fig_stat, f'{scene_name}_fix', input_cfg)
-            L_float_scn = err_time_plot_stat(errlist_float_scn, path_ff_fig_stat, f'{scene_name}_float', input_cfg)
+            L_fix_scn = err_time_plot_stat(errlist_fix_scn, path_ff_fig, f'{scene_name}_fix', input_cfg)
+            L_float_scn = err_time_plot_stat(errlist_float_scn, path_ff_fig, f'{scene_name}_float', input_cfg)
             L_fix_all = np.vstack((L_fix_all, L_fix_scn))
             L_float_all = np.vstack((L_float_all, L_float_scn))    
 
