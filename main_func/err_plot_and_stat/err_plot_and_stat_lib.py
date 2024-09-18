@@ -45,15 +45,35 @@ def fig_plt(xaxis: np.ndarray, yaxis_list, title: list, xlabel: str, ylabel: str
 
 def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.ndarray) -> dict:
     # 时间特征值
-    ev_time_key = ['10s', '30s', '60s', '120s']
-    ev_time = [10, 30, 60, 120]
+    ev_time_key = [10, 30, 60, 120]
     # 距离特征值
-    ev_dis_key = ['0.5km', '1km', '2km']
-    ev_dis = [500, 1000, 2000]
+    ev_dis_key = [500, 1000, 2000]
 
-    dr_time_dict = {k: 0 for k in ev_time_key}
-    dr_dis_dict = {k: 0 for k in ev_dis_key}
+    dr_time_dict = {f'{k}s': np.nan for k in ev_time_key}
+    dr_dis_dict = {f'{k}m': np.nan for k in ev_dis_key}
+
+    time_diff = time_array[-1] - time_array[0]
+    dis_diff = dis_array[-1] - dis_array[0]
+
+    for i, seg in enumerate(ev_time_key):
+        if time_diff < seg:
+            for j in range(i+1):
+                dr_time_dict[f'{ev_time_key[j]}s'] = np.max(errlist[0: np.where(time_array <= time_array[0] + ev_time_key[j])])
+            break
+        else:
+            for seg in ev_time_key:
+                dr_time_dict[f'{seg}s'] = np.max(errlist[0: np.where(time_array <= time_array[0] + seg)])
+
+    for i, seg in enumerate(ev_dis_key):
+        if dis_diff < seg:
+            for j in range(i+1):
+                dr_dis_dict[f'{ev_dis_key[j]}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + ev_dis_key[j])])
+            break
+        else:
+            for seg in ev_dis_key:
+                dr_dis_dict[f'{seg}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + seg)])
     
+    return dr_time_dict, dr_dis_dict
     
 
 
@@ -134,22 +154,23 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
 def dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg):
     # 获取减去30s的时间作为出隧道时间
     turnel_t = errlist_scn[-1, 1] - errlist_scn[0, 1] - 30
-    # 获取30s前的索引值，来获取出隧道时的行驶距离
+    # 获取30s前的索引值
     turnel_index = np.searchsorted(errlist_scn[:, 1], turnel_t, side='right') - 1
 
-    turnel_dis = errlist_scn[turnel_index, 12] - errlist_scn[0, 12]
-    # dr_err_time_max = {'10s': 0, '30s': 0, '60s': 0, '120s': 0}
-    # dr_err_dis_max = {'0.5km': 0, '1km': 0, '2km': 0}
-    dr_err_time_x_dict, dr_err_dis_x_dict= 
-    dr_err_time_y_dict, dr_err_dis_y_dict
-    dr_err_time_alt_dict, dr_err_dis_alt_dict
-    dr_err_time_pos_dict, dr_err_dis_pos_dict
-    dr_err_time_ve_dict, dr_err_dis_ve_dict
-    dr_err_time_vn_dict, dr_err_dis_vn_dict
-    dr_err_time_vu_dict, dr_err_dis_vu_dict
-    dr_err_time_roll_dict, dr_err_dis_roll_dict
-    dr_err_time_pitch_dict, dr_err_dis_pitch_dict
-    dr_err_time_heading_dict, dr_err_dis_heading_dict
+    time_array = errlist_scn[:turnel_index, 1]
+    dis_array = errlist_scn[:turnel_index, 12]
+    dr_err_time_x_dict, dr_err_dis_x_dict = cal_err_with_ev(errlist_scn[:turnel_index, 2], time_array, dis_array)
+    dr_err_time_y_dict, dr_err_dis_y_dict = cal_err_with_ev(errlist_scn[:turnel_index, 3], time_array, dis_array)
+    dr_err_time_alt_dict, dr_err_dis_alt_dict = cal_err_with_ev(errlist_scn[:turnel_index, 4], time_array, dis_array)
+    dr_err_time_pos_dict, dr_err_dis_pos_dict = cal_err_with_ev(errlist_scn[:turnel_index, 11], time_array, dis_array)
+    dr_err_time_ve_dict, dr_err_dis_ve_dict = cal_err_with_ev(errlist_scn[:turnel_index, 5], time_array, dis_array)
+    dr_err_time_vn_dict, dr_err_dis_vn_dict = cal_err_with_ev(errlist_scn[:turnel_index, 6], time_array, dis_array)
+    dr_err_time_vu_dict, dr_err_dis_vu_dict = cal_err_with_ev(errlist_scn[:turnel_index, 7], time_array, dis_array)
+    dr_err_time_roll_dict, dr_err_dis_roll_dict = cal_err_with_ev(errlist_scn[:turnel_index, 8], time_array, dis_array)
+    dr_err_time_pitch_dict, dr_err_dis_pitch_dict = cal_err_with_ev(errlist_scn[:turnel_index, 9], time_array, dis_array)
+    dr_err_time_heading_dict, dr_err_dis_heading_dict = cal_err_with_ev(errlist_scn[:turnel_index, 10], time_array, dis_array)
+    
+    # 生成DR误差统计列表
     
 
     
