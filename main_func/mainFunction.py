@@ -54,6 +54,12 @@ def mainFunc(input_cfg: dict):
         if input_cfg['output_multi_fig']:
             multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
 
+        # 自动添加全程场景
+        if input_cfg['era_auto_all']:
+            input_cfg['era_list']['Scene'].insert(0, '全程')
+            input_cfg['era_list']['start_time'].append(0, [array_bchmk[0, 1]])
+            input_cfg['era_list']['end_time'].append(0, [array_bchmk[-1, 1]])
+
         # 生成图像和统计表结果
         result_gen_func(array_bchmk, array_test, errlist, path_proj_dev, input_cfg)
 

@@ -49,8 +49,8 @@ def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.n
     # 距离特征值
     ev_dis_key = [500, 1000, 2000]
 
-    dr_time_dict = {f'{k}s': np.nan for k in ev_time_key}
-    dr_dis_dict = {f'{k}m': np.nan for k in ev_dis_key}
+    dr_time_dict = {f'{k}s': '' for k in ev_time_key}
+    dr_dis_dict = {f'{k}m': '' for k in ev_dis_key}
 
     time_diff = time_array[-1] - time_array[0]
     dis_diff = dis_array[-1] - dis_array[0]
@@ -72,9 +72,8 @@ def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.n
         else:
             for seg in ev_dis_key:
                 dr_dis_dict[f'{seg}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + seg)])
-    
+
     return dr_time_dict, dr_dis_dict
-    
 
 
 def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.ndarray:
@@ -142,20 +141,20 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
     L_roll = np.array((['横滚角误差'], [SIGMA['roll']['sig1']], [SIGMA['roll']['sig2']], [SIGMA['roll']['sig3']], [RMS['roll']], [MAX['roll']]))
     L_pitch = np.array((['俯仰角误差'], [SIGMA['pitch']['sig1']], [SIGMA['pitch']['sig2']], [SIGMA['pitch']['sig3']], [RMS['pitch']], [MAX['pitch']]))
     L_heading = np.array((['航向角误差'], [SIGMA['heading']['sig1']], [SIGMA['heading']['sig2']], [SIGMA['heading']['sig3']], [RMS['heading']], [MAX['heading']]))
-    L_distance = np.array((['总里程'], [distance], [np.nan], [np.nan], [np.nan], [np.nan]))
-    L_fix_ratio = np.array((['固定率'], [fix_ratio], [np.nan], [np.nan], [np.nan], [np.nan]))
-    L_name = np.array((['场景'], [scene_name], [np.nan], [np.nan], [np.nan], [np.nan]))
+    L_distance = np.array((['总里程'], [distance], [''], [''], [''], ['']))
+    L_fix_ratio = np.array((['固定率'], [fix_ratio], [''], [''], [''], ['']))
+    L_name = np.array((['场景'], [scene_name], [''], [''], [''], ['']))
     L_title = np.array((['指标'], ['1σ'], ['2σ'], ['3σ'], ['RMS'], ['MAX']))
 
     L_scn = np.hstack((L_name, L_title, L_x, L_y, L_alt, L_pos, L_ve, L_vn, L_vu, L_roll, L_pitch, L_heading, L_fix_ratio, L_distance))
     return L_scn
 
 
-def dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg):
+def dr_err_stat(errlist_scn, scene_name, input_cfg):
     # 获取减去30s的时间作为出隧道时间
     turnel_t = errlist_scn[-1, 1] - errlist_scn[0, 1] - 30
     # 获取30s前的索引值
-    turnel_index = np.searchsorted(errlist_scn[:, 1], turnel_t, side='right') - 1
+    turnel_index = np.searchsorted(errlist_scn[:, 1], turnel_t, side='right')
 
     time_array = errlist_scn[:turnel_index, 1]
     dis_array = errlist_scn[:turnel_index, 12]
@@ -169,12 +168,32 @@ def dr_err_stat(errlist_scn, path_scene, scene_name, input_cfg):
     dr_err_time_roll_dict, dr_err_dis_roll_dict = cal_err_with_ev(errlist_scn[:turnel_index, 8], time_array, dis_array)
     dr_err_time_pitch_dict, dr_err_dis_pitch_dict = cal_err_with_ev(errlist_scn[:turnel_index, 9], time_array, dis_array)
     dr_err_time_heading_dict, dr_err_dis_heading_dict = cal_err_with_ev(errlist_scn[:turnel_index, 10], time_array, dis_array)
-    
-    # 生成DR误差统计列表
-    
 
-    
-    pass
+    # 计算出隧道后的恢复固定解时间
+    if round(np.sum(errlist_scn[:turnel_index, [13]] == 6) / len(errlist_scn[:turnel_index, [13]]) * 100, 2) > 80:
+        index_fix = np.where(errlist_scn[turnel_index:, 13] == 1)[0]
+        if len(index_fix) == 0:
+            fix_time = '>30s'
+        fix_time = errlist_scn[turnel_index + index_fix, 1] - errlist_scn[turnel_index, 1]
+
+    # 生成DR误差统计列表
+    L_x = np.array((['横向误差'], [dr_err_time_x_dict['10s']], [dr_err_time_x_dict['30s']], [dr_err_time_x_dict['60s']], [dr_err_time_x_dict['120s']], [dr_err_dis_x_dict['500m']], [dr_err_dis_x_dict['1000m']], [dr_err_dis_x_dict['2000m']]))
+    L_y = np.array((['纵向误差'], [dr_err_time_y_dict['10s']], [dr_err_time_y_dict['30s']], [dr_err_time_y_dict['60s']], [dr_err_time_y_dict['120s']], [dr_err_dis_y_dict['500m']], [dr_err_dis_y_dict['1000m']], [dr_err_dis_y_dict['2000m']]))
+    L_alt = np.array((['高程误差'], [dr_err_time_alt_dict['10s']], [dr_err_time_alt_dict['30s']], [dr_err_time_alt_dict['60s']], [dr_err_time_alt_dict['120s']], [dr_err_dis_alt_dict['500m']], [dr_err_dis_alt_dict['1000m']], [dr_err_dis_alt_dict['2000m']]))
+    L_pos = np.array((['水平误差'], [dr_err_time_pos_dict['10s']], [dr_err_time_pos_dict['30s']], [dr_err_time_pos_dict['60s']], [dr_err_time_pos_dict['120s']], [dr_err_dis_pos_dict['500m']], [dr_err_dis_pos_dict['1000m']], [dr_err_dis_pos_dict['2000m']]))
+    L_ve = np.array((['ve误差'], [dr_err_time_ve_dict['10s']], [dr_err_time_ve_dict['30s']], [dr_err_time_ve_dict['60s']], [dr_err_time_ve_dict['120s']], [dr_err_dis_ve_dict['500m']], [dr_err_dis_ve_dict['1000m']], [dr_err_dis_ve_dict['2000m']]))
+    L_vn = np.array((['vn误差'], [dr_err_time_vn_dict['10s']], [dr_err_time_vn_dict['30s']], [dr_err_time_vn_dict['60s']], [dr_err_time_vn_dict['120s']], [dr_err_dis_vn_dict['500m']], [dr_err_dis_vn_dict['1000m']], [dr_err_dis_vn_dict['2000m']]))
+    L_vu = np.array((['vu误差'], [dr_err_time_vu_dict['10s']], [dr_err_time_vu_dict['30s']], [dr_err_time_vu_dict['60s']], [dr_err_time_vu_dict['120s']], [dr_err_dis_vu_dict['500m']], [dr_err_dis_vu_dict['1000m']], [dr_err_dis_vu_dict['2000m']]))
+    L_roll = np.array((['横滚角误差'], [dr_err_time_roll_dict['10s']], [dr_err_time_roll_dict['30s']], [dr_err_time_roll_dict['60s']], [dr_err_time_roll_dict['120s']], [dr_err_dis_roll_dict['500m']], [dr_err_dis_roll_dict['1000m']], [dr_err_dis_roll_dict['2000m']]))
+    L_pitch = np.array((['俯仰角误差'], [dr_err_time_pitch_dict['10s']], [dr_err_time_pitch_dict['30s']], [dr_err_time_pitch_dict['60s']], [dr_err_time_pitch_dict['120s']], [dr_err_dis_pitch_dict['500m']], [dr_err_dis_pitch_dict['1000m']], [dr_err_dis_pitch_dict['2000m']]))
+    L_heading = np.array((['航向角误差'], [dr_err_time_heading_dict['10s']], [dr_err_time_heading_dict['30s']], [dr_err_time_heading_dict['60s']], [dr_err_time_heading_dict['120s']], [dr_err_dis_heading_dict['500m']], [dr_err_dis_heading_dict['1000m']], [dr_err_dis_heading_dict['2000m']]))
+    L_name = np.array((['场景'], [scene_name], [''], [''], [''], [''], [''], [''], ['']))
+    L_title = np.array((['指标'], ['10s'], ['30s'], ['60s'], ['120s'], ['500m'], ['1000m'], ['2000m']))
+    L_fix_time = np.array((['恢复固定解时间'], [fix_time], [''], [''], [''], [''], [''], [''], ['']))
+
+    L_dr = np.hstack((L_name, L_title, L_x, L_y, L_alt, L_pos, L_ve, L_vn, L_vu, L_roll, L_pitch, L_heading, L_fix_time))
+
+    return L_dr
 
 
 def multi_dev_err_plot(err_dict, input_cfg):
@@ -200,7 +219,7 @@ def multi_dev_err_plot(err_dict, input_cfg):
         for j in range(len(start_t_list)):
             start_t = start_t_list[j]
             end_t = end_t_list[j]
-                
+
             for k in input_cfg['dev_name_list']:
                 time_list = err_dict[k][:, 1]
                 indx = np.where((time_list >= start_t) & (time_list < end_t))[0]
