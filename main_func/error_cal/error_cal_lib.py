@@ -17,16 +17,16 @@ def wgs84_to_utm(lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
         transformer = Transformer.from_crs("EPSG:4326", utm_proj_str)
         easting[mask], northing[mask] = transformer.transform(lat[mask], lon[mask])
 
-    return easting, northing, utm_zone
+    return easting, northing
 
 
 def get_distance(e: np.ndarray, n: np.ndarray, alt: np.ndarray, ve: np.ndarray, vn: np.ndarray) -> np.ndarray:
     distance = np.zeros((len(e), 1))
     dis_diff = 0
     v0 = np.sqrt(np.power(ve, 2) + np.power(vn, 2))
-    e_diff = np.vstack(np.array([0]), np.diff(e))
-    n_diff = np.vstack(np.array([0]), np.diff(n))
-    alt_diff = np.vstack(np.array([0]), np.diff(alt))
+    e_diff = np.vstack((np.array([0]), np.diff(e)))
+    n_diff = np.vstack((np.array([0]), np.diff(n)))
+    alt_diff = np.vstack((np.array([0]), np.diff(alt)))
     for i in range(len(e)):
         if v0[i] > 0.02:
             dis_diff = dis_diff + np.sqrt(np.power(e_diff[i], 2) + np.power(n_diff[i], 2) + np.power(alt_diff[i], 2))

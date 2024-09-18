@@ -11,11 +11,13 @@ from data_read_and_decode.data_rnd_lib import *
 from error_cal.err_cal import err_cal_func
 from err_plot_and_stat.err_plot_and_stat_lib import *
 from err_plot_and_stat.result_gen import result_gen_func
-from report_output.report_gen import report_gen_func
+# from report_output.report_gen import report_gen_func
+from proj_cfg_read import yaml_read
 
 
-def mainFunc(input_cfg: dict):
-    if input_cfg['output_multi_fig']:
+def mainFunc(yaml_path: str):
+    input_cfg = yaml_read(yaml_path)
+    if len(input_cfg['dev_name_list']) > 1 and input_cfg['output_multi_fig']:
         multi_dev_err_dict = {k: np.array([]) for k in input_cfg['dev_name_list']}
     for i in range(len(input_cfg['path_in_list'])):
         # 根据被测数据文件名称生成项目子路径
@@ -41,17 +43,26 @@ def mainFunc(input_cfg: dict):
         if input_cfg['data_frq_truth'] is not None and i == 0:
             itv_chk_report_path = join(input_cfg['path_proj'], 'itv_chk_report_bchmk.txt')
             pack_lost_chk(array_bchmk_ori, input_cfg['data_frq_truth'], itv_chk_report_path)
-        if input_cfg['data_frq_list'][i] is not None:
+
+        if input_cfg['data_frq_list'][i] != '':
             itv_chk_report_path = join(path_proj_dev, 'itv_chk_report_test.txt')
             pack_lost_chk(array_test_ori, input_cfg['data_frq_list'][i], itv_chk_report_path)
 
         # 匹配相同时间戳的行
+        # 提取相同时间戳列的索引
         indx_common = np.intersect1d(array_bchmk_ori[:, [1]], array_test_ori[:, [1]])
-        array_bchmk = array_bchmk_ori[np.isin(array_bchmk_ori[:, [1]], indx_common)]
-        array_test = array_test_ori[np.isin(array_test_ori[:, [1]], indx_common)]
+        index_common_bool_bchmk = np.isin(array_bchmk_ori[:, [1]], indx_common)
+        index_common_bool_test = np.isin(array_test_ori[:, [1]], indx_common)
+        # 列转成行
+        index_common_bool_bchmk = np.reshape(index_common_bool_bchmk, (index_common_bool_bchmk.shape[0],))
+        index_common_bool_test = np.reshape(index_common_bool_test, (index_common_bool_test.shape[0],))
+        # 提取相同时间戳的行
+        array_bchmk = array_bchmk_ori[index_common_bool_bchmk, :]
+        array_test = array_test_ori[index_common_bool_test, :]
         # 计算误差
         errlist = err_cal_func(array_bchmk, array_test, input_cfg)
-        if input_cfg['output_multi_fig']:
+
+        if multi_dev_err_dict in locals():
             multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
 
         # 自动添加全程场景
@@ -63,13 +74,13 @@ def mainFunc(input_cfg: dict):
         # 生成图像和统计表结果
         result_gen_func(array_bchmk, array_test, errlist, path_proj_dev, input_cfg)
 
-    if input_cfg['output_multi_fig']:
+    if multi_dev_err_dict in locals():
         # 输出多设备误差对比图
         multi_dev_err_plot(multi_dev_err_dict, input_cfg)
 
     # 输出报告
-    report_gen_func()
+    # report_gen_func()
 
 
 if __name__ == '__main__':
-    mainFunc()
+    mainFunc(r"C:\VSCode\Python\python_proj\.DataAnalysisAPP_py_ori\debug\test.yaml")
