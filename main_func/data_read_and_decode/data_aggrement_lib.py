@@ -26,6 +26,8 @@ def decode_navplot(data_path: str) -> np.ndarray:
     data_matrix[:, [11]] = file_matrix[:, [5]]
     data_matrix[:, [12]] = file_matrix[:, [14]]
     data_matrix[:, [13]] = file_matrix[:, [6]]
+
+    data_matrix = np.nan_to_num(data_matrix)
     return data_matrix
 
 

@@ -30,6 +30,7 @@ def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dic
 
     # 计算系统误差
     syserr = get_syserr(err_x, err_y, err_alt, err_roll, err_pitch, err_heading, input_cfg, array_test[:, [11]])
+    print(syserr)
 
     # 去除系统误差
     if input_cfg["out2car_coor"]:

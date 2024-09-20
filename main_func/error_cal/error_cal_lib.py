@@ -21,16 +21,15 @@ def wgs84_to_utm(lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
 
 
 def get_distance(e: np.ndarray, n: np.ndarray, alt: np.ndarray, ve: np.ndarray, vn: np.ndarray) -> np.ndarray:
-    distance = np.zeros((len(e), 1))
+    distance = np.zeros_like(e)
     dis_diff = 0
     v0 = np.sqrt(np.power(ve, 2) + np.power(vn, 2))
-    e_diff = np.vstack((np.array([0]), np.diff(e)))
-    n_diff = np.vstack((np.array([0]), np.diff(n)))
-    alt_diff = np.vstack((np.array([0]), np.diff(alt)))
     for i in range(len(e)):
         if v0[i] > 0.02:
-            dis_diff = dis_diff + np.sqrt(np.power(e_diff[i], 2) + np.power(n_diff[i], 2) + np.power(alt_diff[i], 2))
-            distance[i] = dis_diff
+            dis_diff += np.sqrt(np.power(e[i] - e[i-1], 2) + np.power(n[i] - n[i-1], 2) + np.power(alt[i] - alt[i-1], 2))
+            distance[i] = dis_diff[0]
+        else:
+            distance[i] = distance[i - 1]
     return distance
 
 
@@ -46,7 +45,7 @@ def check_deg(deg_input: np.ndarray) -> np.ndarray:
     return deg_output
 
 
-def syserr_cal_alg(data: np.ndarray) -> np.ndarray:
+def syserr_cal_alg(data: np.ndarray) -> float:
     for num in range(5):
         numdata = []
         me = np.mean(data)
@@ -66,8 +65,9 @@ def syserr_cal_alg(data: np.ndarray) -> np.ndarray:
                 numdata.append(k)
         numdata.sort(reverse=True)
         for m in numdata:
-            del data[m]
-    return data
+            np.delete(data, m)
+        syserr = np.mean(data)
+    return syserr
 
 
 def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
@@ -79,7 +79,7 @@ def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
 
     syserr_keys = ["x", "y", "alt", "roll", "pitch", "heading"]
     input_keys = ["cal_pos_syserr", "cal_pos_syserr", "cal_alt_syserr", "cal_att_syserr", "cal_att_syserr", "cal_att_syserr"]
-    usr_def_keys = ["usr_def_syserr_x", "usr_def_syserr_y", "usr_def_syserr_alt", "usr_def_syserr_r", "usr_def_syserr_p", "usr_def_syserr_h"]
+    usr_def_keys = ["usr_def_syserr_x", "usr_def_syserr_y", "usr_def_syserr_z", "usr_def_syserr_r", "usr_def_syserr_p", "usr_def_syserr_h"]
     data = [x, y, alt, roll, pitch, heading]
 
     for i, key in enumerate(syserr_keys):

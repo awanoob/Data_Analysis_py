@@ -8,7 +8,7 @@ from docx.oxml import OxmlElement
 from docx.shared import Cm, Pt
 from docx.oxml.ns import qn
 
-import styles
+import report_output.styles
 import pandas as pd
 import os
 import glob

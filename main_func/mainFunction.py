@@ -1,9 +1,9 @@
-# Date: 2024-09-01
+# Date: 2024-09-20
 # Author: Jacob Cheng
 # Email: yanqi_cheng@huace.com
-# Version: 0.1
+# Version: 0.5_beta
 # Description: This function is the main function of the project. It is used to call other functions in the project.
-# Input: input_cfg: dict, the configuration of the project
+# Input: path of yaml.
 from os.path import join, exists
 from os import makedirs
 import numpy as np
@@ -11,13 +11,13 @@ from data_read_and_decode.data_rnd_lib import *
 from error_cal.err_cal import err_cal_func
 from err_plot_and_stat.err_plot_and_stat_lib import *
 from err_plot_and_stat.result_gen import result_gen_func
-# from report_output.report_gen import report_gen_func
+from report_output.report_gen import report_gen_func
 from proj_cfg_read import yaml_read
 
 
 def mainFunc(yaml_path: str):
     input_cfg = yaml_read(yaml_path)
-    if len(input_cfg['dev_name_list']) > 1 and input_cfg['output_multi_fig']:
+    if len(input_cfg['dev_name_list']) >= 1 and input_cfg['output_multi_fig']:
         multi_dev_err_dict = {k: np.array([]) for k in input_cfg['dev_name_list']}
     for i in range(len(input_cfg['path_in_list'])):
         # 根据被测数据文件名称生成项目子路径
@@ -62,24 +62,24 @@ def mainFunc(yaml_path: str):
         # 计算误差
         errlist = err_cal_func(array_bchmk, array_test, input_cfg)
 
-        if multi_dev_err_dict in locals():
+        if 'multi_dev_err_dict' in locals():
             multi_dev_err_dict[input_cfg['dev_name_list'][i]] = errlist
 
         # 自动添加全程场景
         if input_cfg['era_auto_all']:
             input_cfg['era_list']['Scene'].insert(0, '全程')
-            input_cfg['era_list']['start_time'].append(0, [array_bchmk[0, 1]])
-            input_cfg['era_list']['end_time'].append(0, [array_bchmk[-1, 1]])
+            input_cfg['era_list']['start_time'].insert(0, [array_bchmk[0, 1]])
+            input_cfg['era_list']['end_time'].insert(0, [array_bchmk[-1, 1]])
 
         # 生成图像和统计表结果
         result_gen_func(array_bchmk, array_test, errlist, path_proj_dev, input_cfg)
 
-    if multi_dev_err_dict in locals():
+    if 'multi_dev_err_dict' in locals():
         # 输出多设备误差对比图
         multi_dev_err_plot(multi_dev_err_dict, input_cfg)
 
     # 输出报告
-    # report_gen_func()
+    report_gen_func()
 
 
 if __name__ == '__main__':

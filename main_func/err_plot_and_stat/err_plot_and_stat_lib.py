@@ -20,9 +20,9 @@ def sigma(err: np.ndarray, input_cfg) -> dict:
         row1, row2, row3 = round(row_len * sigma1), round(row_len * sigma2), round(row_len * sigma3)
 
     sig_count = {
-        'sig1': round(err[row1 - 1], 4), # Python index starts from 0
-        'sig2': round(err[row2 - 1], 4),
-        'sig3': round(err[row3 - 1], 4)
+        'sig1': round(err[row1 - 1][0], 4),  # Python index starts from 0
+        'sig2': round(err[row2 - 1][0], 4),
+        'sig3': round(err[row3 - 1][0], 4)
     }
 
     return sig_count
@@ -33,14 +33,16 @@ def fig_plt(xaxis: np.ndarray, yaxis_list, title: list, xlabel: str, ylabel: str
     fig, ax = plt.subplots(i, 1, figsize=(19.2, 10.8))
     for i, yaxis_idct in enumerate(yaxis_list):
         for yaxis_dev, color_inturn in zip(yaxis_idct, color_lib.values()):
-            ax[i].plot(xaxis, yaxis_dev, color=color_inturn)
-        ax[i].set_title(title[i], fontsize=16)
-        ax[i].set_xlabel(xlabel, fontsize=14)
-        ax[i].set_ylabel(ylabel, fontsize=14)
+            ax[i].plot(xaxis, yaxis_dev, color=color_inturn, linewidth=0.5)
+        ax[i].set_title(title[i], fontdict={'family': 'Microsoft YaHei', 'size': 16})
+        ax[i].set_xlabel(xlabel, fontdict={'family': 'Microsoft YaHei', 'size': 14})
+        ax[i].set_ylabel(ylabel, fontdict={'family': 'Microsoft YaHei', 'size': 14})
         ax[i].grid(color='lightgray', linestyle='-', linewidth=0.5)
         if len(kwargs) > 0 and kwargs['is_multiplot']:
             ax[i].legend(args[0])
+    fig.tight_layout()
     fig.savefig(fig_path, dpi=300, bbox_inches='tight', format='png')
+    plt.close(fig)
 
 
 def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.ndarray) -> dict:
@@ -57,21 +59,21 @@ def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.n
 
     for i, seg in enumerate(ev_time_key):
         if time_diff < seg:
-            for j in range(i+1):
-                dr_time_dict[f'{ev_time_key[j]}s'] = np.max(errlist[0: np.where(time_array <= time_array[0] + ev_time_key[j])])
+            for j in range(i + 1):
+                dr_time_dict[f'{ev_time_key[j]}s'] = np.max(errlist[0: np.where(time_array <= time_array[0] + ev_time_key[j])[0][-1]])
             break
         else:
             for seg in ev_time_key:
-                dr_time_dict[f'{seg}s'] = np.max(errlist[0: np.where(time_array <= time_array[0] + seg)])
+                dr_time_dict[f'{seg}s'] = np.max(errlist[0: np.where(time_array <= time_array[0] + seg)[0][-1]])
 
     for i, seg in enumerate(ev_dis_key):
         if dis_diff < seg:
-            for j in range(i+1):
-                dr_dis_dict[f'{ev_dis_key[j]}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + ev_dis_key[j])])
+            for j in range(i + 1):
+                dr_dis_dict[f'{ev_dis_key[j]}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + ev_dis_key[j])[0][-1]])
             break
         else:
             for seg in ev_dis_key:
-                dr_dis_dict[f'{seg}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + seg)])
+                dr_dis_dict[f'{seg}m'] = np.max(errlist[0: np.where(dis_array <= dis_array[0] + seg)[0][-1]])
 
     return dr_time_dict, dr_dis_dict
 
@@ -152,7 +154,7 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
 
 def dr_err_stat(errlist_scn, scene_name, input_cfg):
     # 获取减去30s的时间作为出隧道时间
-    turnel_t = errlist_scn[-1, 1] - errlist_scn[0, 1] - 30
+    turnel_t = errlist_scn[-1, 1] - 30
     # 获取30s前的索引值
     turnel_index = np.searchsorted(errlist_scn[:, 1], turnel_t, side='right')
 
@@ -174,7 +176,7 @@ def dr_err_stat(errlist_scn, scene_name, input_cfg):
         index_fix = np.where(errlist_scn[turnel_index:, 13] == 1)[0]
         if len(index_fix) == 0:
             fix_time = '>30s'
-        fix_time = errlist_scn[turnel_index + index_fix, 1] - errlist_scn[turnel_index, 1]
+        fix_time = errlist_scn[turnel_index + index_fix[0], 1] - errlist_scn[turnel_index, 1]
 
     # 生成DR误差统计列表
     L_x = np.array((['横向误差'], [dr_err_time_x_dict['10s']], [dr_err_time_x_dict['30s']], [dr_err_time_x_dict['60s']], [dr_err_time_x_dict['120s']], [dr_err_dis_x_dict['500m']], [dr_err_dis_x_dict['1000m']], [dr_err_dis_x_dict['2000m']]))
@@ -187,9 +189,9 @@ def dr_err_stat(errlist_scn, scene_name, input_cfg):
     L_roll = np.array((['横滚角误差'], [dr_err_time_roll_dict['10s']], [dr_err_time_roll_dict['30s']], [dr_err_time_roll_dict['60s']], [dr_err_time_roll_dict['120s']], [dr_err_dis_roll_dict['500m']], [dr_err_dis_roll_dict['1000m']], [dr_err_dis_roll_dict['2000m']]))
     L_pitch = np.array((['俯仰角误差'], [dr_err_time_pitch_dict['10s']], [dr_err_time_pitch_dict['30s']], [dr_err_time_pitch_dict['60s']], [dr_err_time_pitch_dict['120s']], [dr_err_dis_pitch_dict['500m']], [dr_err_dis_pitch_dict['1000m']], [dr_err_dis_pitch_dict['2000m']]))
     L_heading = np.array((['航向角误差'], [dr_err_time_heading_dict['10s']], [dr_err_time_heading_dict['30s']], [dr_err_time_heading_dict['60s']], [dr_err_time_heading_dict['120s']], [dr_err_dis_heading_dict['500m']], [dr_err_dis_heading_dict['1000m']], [dr_err_dis_heading_dict['2000m']]))
-    L_name = np.array((['场景'], [scene_name], [''], [''], [''], [''], [''], [''], ['']))
+    L_name = np.array((['场景'], [scene_name], [''], [''], [''], [''], [''], ['']))
     L_title = np.array((['指标'], ['10s'], ['30s'], ['60s'], ['120s'], ['500m'], ['1000m'], ['2000m']))
-    L_fix_time = np.array((['恢复固定解时间'], [fix_time], [''], [''], [''], [''], [''], [''], ['']))
+    L_fix_time = np.array((['恢复固定解时间'], [fix_time], [''], [''], [''], [''], [''], ['']))
 
     L_dr = np.hstack((L_name, L_title, L_x, L_y, L_alt, L_pos, L_ve, L_vn, L_vu, L_roll, L_pitch, L_heading, L_fix_time))
 
@@ -215,25 +217,26 @@ def multi_dev_err_plot(err_dict, input_cfg):
 
         err_dict_scn = {k: np.array([]) for k in input_cfg['dev_name_list']}
 
-        # 按照开始时间和结束时间划分数据
-        for j in range(len(start_t_list)):
-            start_t = start_t_list[j]
-            end_t = end_t_list[j]
-
-            for k in input_cfg['dev_name_list']:
+        # 按照设备和开始时间和结束时间划分数据
+        for k in input_cfg['dev_name_list']:
+            err_scn_list = []
+            for j in range(len(start_t_list)):
+                start_t = start_t_list[j]
+                end_t = end_t_list[j]
                 time_list = err_dict[k][:, 1]
                 indx = np.where((time_list >= start_t) & (time_list < end_t))[0]
-                err_dict_scn[k] = np.vstack((err_dict_scn[k], err_dict[k][indx]))
+                err_scn_list.append(err_dict[k][indx])
+            err_dict_scn[k] = np.vstack((err_scn_list))
 
         # 生成多设备误差对比图
         fig_xy_path = join(path_scene, f'{scene_name}_xy.png')
         fig_pos_alt_path = join(path_scene, f'{scene_name}_pos_alt.png')
         fig_vel_path = join(path_scene, f'{scene_name}_vel.png')
         fig_att_path = join(path_scene, f'{scene_name}_att.png')
-        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [2]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [3]] for k in input_cfg['dev_name_list']]], ['横向误差', '纵向误差'], 'Time/s', '/m', fig_xy_path, input_cfg['dev_name_list'], is_multiplot=True)
-        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [11]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [4]] for k in input_cfg['dev_name_list']]], ['水平误差', '高程误差'], 'Time/s', '/m', fig_pos_alt_path, input_cfg['dev_name_list'], is_multiplot=True)
-        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [5]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [6]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [7]] for k in input_cfg['dev_name_list']]], ['ve误差', 'vn误差', 'vu误差'], 'Time/s', '/(m/s)', fig_vel_path, input_cfg['dev_name_list'], is_multiplot=True)
-        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [8]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [9]] for k in input_cfg['dev_name_list']]], [[err_dict_scn[k][:, [10]] for k in input_cfg['dev_name_list']]], ['横滚角误差', '俯仰角误差', '航向角误差'], 'Time/s', '/°', fig_att_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [2]] for k in input_cfg['dev_name_list']], [err_dict_scn[k][:, [3]] for k in input_cfg['dev_name_list']]], ['横向误差', '纵向误差'], 'Time/s', '/m', fig_xy_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [11]] for k in input_cfg['dev_name_list']], [err_dict_scn[k][:, [4]] for k in input_cfg['dev_name_list']]], ['水平误差', '高程误差'], 'Time/s', '/m', fig_pos_alt_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [5]] for k in input_cfg['dev_name_list']], [err_dict_scn[k][:, [6]] for k in input_cfg['dev_name_list']], [err_dict_scn[k][:, [7]] for k in input_cfg['dev_name_list']]], ['ve误差', 'vn误差', 'vu误差'], 'Time/s', '/(m/s)', fig_vel_path, input_cfg['dev_name_list'], is_multiplot=True)
+        fig_plt(err_dict_scn[input_cfg['dev_name_list'][0]][:, [1]], [[err_dict_scn[k][:, [8]] for k in input_cfg['dev_name_list']], [err_dict_scn[k][:, [9]] for k in input_cfg['dev_name_list']], [err_dict_scn[k][:, [10]] for k in input_cfg['dev_name_list']]], ['横滚角误差', '俯仰角误差', '航向角误差'], 'Time/s', '/°', fig_att_path, input_cfg['dev_name_list'], is_multiplot=True)
 
 
 __all__ = ['err_time_plot_stat', 'dr_err_stat', 'multi_dev_err_plot']

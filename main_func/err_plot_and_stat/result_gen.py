@@ -10,6 +10,7 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
     L_all = np.empty((0, 14))
     L_fix_all = np.empty((0, 14))
     L_float_all = np.empty((0, 14))
+    L_dr_all = np.empty((0, 13))
     dev_name = path_main.split('\\')[-1]
     for i in range(len(input_cfg['era_list']['Scene'])):
         # 获取场景名称和时间段
@@ -22,18 +23,23 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
         if not exists(path_scene):
             makedirs(path_scene)
 
-        array_bchmk_scn = np.array([])
-        array_test_scn = np.array([])
-        errlist_scn = np.array([])
+        array_bchmk_scn_list = []
+        array_test_scn_list = []
+        errlist_scn_list = []
 
         # 按照开始时间和结束时间划分数据
         for j in range(len(start_t_list)):
             start_t = start_t_list[j]
             end_t = end_t_list[j]
             indx = np.where((array_bchmk[:, [1]] >= start_t) & (array_bchmk[:, [1]] < end_t))[0]
-            np.vstack((array_bchmk_scn, array_bchmk[indx]))
-            np.vstack((array_test_scn, array_test[indx]))
-            np.vstack((errlist_scn, errlist[indx]))
+
+            array_bchmk_scn_list.append(array_bchmk[indx])
+            array_test_scn_list.append(array_test[indx])
+            errlist_scn_list.append(errlist[indx])
+
+            array_bchmk_scn = np.vstack((array_bchmk_scn_list))
+            array_test_scn = np.vstack((array_test_scn_list))
+            errlist_scn = np.vstack((errlist_scn_list))
 
         # 输出单场景navplot文件
         output_navplot(array_bchmk_scn, join(path_scene, f"{scene_name}_bchmk.navplot"))
@@ -68,7 +74,7 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
             # 多取30s数据，以保证出隧道误差统计的完整性
             errlist_scn = errlist[np.where((array_bchmk[:, [1]] >= start_t) & (array_bchmk[:, [1]] < end_t + 30))[0]]
             L_dr_scn = dr_err_stat(errlist_scn, scene_name, input_cfg)
-            L_dr_all = np.vstack((L_all, L_dr_scn))
+            L_dr_all = np.vstack((L_dr_all, L_dr_scn))
 
     # 将ndarray转换为DataFrame
     L_all = pd.DataFrame(L_all)
