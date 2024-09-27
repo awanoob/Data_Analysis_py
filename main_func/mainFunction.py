@@ -19,14 +19,16 @@ def mainFunc(yaml_path: str):
     input_cfg = yaml_read(yaml_path)
     if len(input_cfg['dev_name_list']) >= 1 and input_cfg['output_multi_fig']:
         multi_dev_err_dict = {k: np.array([]) for k in input_cfg['dev_name_list']}
+    # 基准设备数据读取
+    array_bchmk_ori = data_decode(input_cfg['path_truth'], input_cfg['data_agg_truth'])
     for i in range(len(input_cfg['path_in_list'])):
         # 根据被测数据文件名称生成项目子路径
         path_proj_dev = join(input_cfg['path_proj'], input_cfg['dev_name_list'][i])
         # 创建项目子路径
         if not exists(path_proj_dev):
             makedirs(path_proj_dev)
-        # 基准设备数据读取
-        array_bchmk_ori = data_decode(input_cfg['path_truth'], input_cfg['data_agg_truth'])
+        # # 基准设备数据读取
+        # array_bchmk_ori = data_decode(input_cfg['path_truth'], input_cfg['data_agg_truth'])
         # 测试设备数据读取
         array_test_ori = data_decode(input_cfg['path_in_list'][i], input_cfg['data_agg_list'][i])
 
@@ -50,12 +52,7 @@ def mainFunc(yaml_path: str):
 
         # 匹配相同时间戳的行
         # 提取相同时间戳列的索引
-        indx_common = np.intersect1d(array_bchmk_ori[:, [1]], array_test_ori[:, [1]])
-        index_common_bool_bchmk = np.isin(array_bchmk_ori[:, [1]], indx_common)
-        index_common_bool_test = np.isin(array_test_ori[:, [1]], indx_common)
-        # 列转成行
-        index_common_bool_bchmk = np.reshape(index_common_bool_bchmk, (index_common_bool_bchmk.shape[0],))
-        index_common_bool_test = np.reshape(index_common_bool_test, (index_common_bool_test.shape[0],))
+        indx_common, index_common_bool_bchmk, index_common_bool_test = np.intersect1d(array_bchmk_ori[:, [1]], array_test_ori[:, [1]], assume_unique=False, return_indices=True)
         # 提取相同时间戳的行
         array_bchmk = array_bchmk_ori[index_common_bool_bchmk, :]
         array_test = array_test_ori[index_common_bool_test, :]
