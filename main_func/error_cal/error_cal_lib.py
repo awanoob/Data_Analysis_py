@@ -3,6 +3,23 @@ from pyproj import Proj, Transformer
 from copy import deepcopy
 
 
+def wgs84_to_enu(lat: np.ndarray, lon: np.ndarray, alt: np.ndarray, ref_lat: np.ndarray, ref_lon: np.ndarray, ref_alt: np.ndarray) -> np.ndarray:
+    # 将WGS84坐标转为ECEF坐标
+    ref_proj_str = "+proj=geocent +datum=WGS84"
+    transformer = Transformer.from_crs("EPSG:4326", ref_proj_str)
+    x, y, z = transformer.transform(lat, lon, alt)
+    ref_x, ref_y, ref_z = transformer.transform(ref_lat, ref_lon, ref_alt)
+    dx = x - ref_x
+    dy = y - ref_y
+    dz = z - ref_z
+    lat_rad = np.deg2rad(lat)
+    lon_rad = np.deg2rad(lon)
+    e = -np.sin(lon_rad) * dx + np.cos(lon_rad) * dy
+    n = -np.sin(lat_rad) * np.cos(lon_rad) * dx - np.sin(lat_rad) * np.sin(lon_rad) * dy + np.cos(lat_rad) * dz
+    u = np.cos(lat_rad) * np.cos(lon_rad) * dx + np.cos(lat_rad) * np.sin(lon_rad) * dy + np.sin(lat_rad) * dz
+    return e, n, u
+
+
 def wgs84_to_utm(lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
     # 根据经度自动选择合适的UTM坐标系
     utm_zone = np.floor((lon + 180) / 6).astype(int) + 1
@@ -93,4 +110,4 @@ def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
     return syserr
 
 
-__all__ = ['wgs84_to_utm', 'get_distance', 'check_deg', 'get_syserr']
+__all__ = ['wgs84_to_enu', 'wgs84_to_utm', 'get_distance', 'check_deg', 'get_syserr']

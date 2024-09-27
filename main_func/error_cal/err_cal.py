@@ -13,9 +13,10 @@ def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dic
     e_test, n_test = wgs84_to_utm(array_test[:, [2]], array_test[:, [3]])
     distance = get_distance(n_bchmk, e_bchmk, array_bchmk[:, [4]], array_bchmk[:, [5]], array_bchmk[:, [6]])
     # 东向、北向和天向误差
-    err_e = e_test - e_bchmk
-    err_n = n_test - n_bchmk
-    err_alt = array_test[:, [4]] - array_bchmk[:, [4]]
+    # err_e = e_test - e_bchmk
+    # err_n = n_test - n_bchmk
+    # err_alt = array_test[:, [4]] - array_bchmk[:, [4]]
+    err_e, err_n, err_alt = wgs84_to_enu(array_test[:, [2]], array_test[:, [3]], array_test[:, [4]], array_bchmk[:, [2]], array_bchmk[:, [3]], array_bchmk[:, [4]])
     # 将东北向误差旋转到车辆坐标系的横纵向误差
     err_x = err_e * np.cos(heading_truth) + err_n * np.sin(heading_truth)  # 横向误差
     err_y = err_n * np.cos(heading_truth) - err_e * np.sin(heading_truth)  # 纵向误差

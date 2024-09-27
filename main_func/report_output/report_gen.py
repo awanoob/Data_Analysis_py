@@ -8,13 +8,13 @@ from docx.oxml import OxmlElement
 from docx.shared import Cm, Pt
 from docx.oxml.ns import qn
 
-import report_output.styles
+import report_output.styles as styles
 import pandas as pd
 import os
 import glob
 
 # 打开模板文档
-doc = Document('./default/module_default.docx')
+doc = Document('./report_output/default/module_default.docx')
 
 default_section = doc.sections[0]
 

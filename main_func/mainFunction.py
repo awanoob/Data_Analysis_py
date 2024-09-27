@@ -83,4 +83,4 @@ def mainFunc(yaml_path: str):
 
 
 if __name__ == '__main__':
-    mainFunc(r"C:\VSCode\Python\python_proj\.DataAnalysisAPP_py_ori\debug\test.yaml")
+    mainFunc()

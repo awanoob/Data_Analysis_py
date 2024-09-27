@@ -41,6 +41,10 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
             array_test_scn = np.vstack((array_test_scn_list))
             errlist_scn = np.vstack((errlist_scn_list))
 
+        if len(array_bchmk_scn) == 0:
+            print(f"场景{scene_name}数据为空，跳过; 开始时间：{start_t_list}, 结束时间：{end_t_list}")
+            continue
+
         # 输出单场景navplot文件
         output_navplot(array_bchmk_scn, join(path_scene, f"{scene_name}_bchmk.navplot"))
         output_navplot(array_test_scn, join(path_scene, f"{scene_name}_test.navplot"))
@@ -64,6 +68,9 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
                 makedirs(path_ff_fig)
             errlist_fix_scn = errlist_scn[np.where(errlist_scn[:, [13]] == 1)[0]]
             errlist_float_scn = errlist_scn[np.where(errlist_scn[:, [13]] == 2)[0]]
+            if len(errlist_fix_scn) == 0 or len(errlist_float_scn) == 0:
+                print(f"场景{scene_name}固定解或浮动解数据为空，跳过")
+                continue
             L_fix_scn = err_time_plot_stat(errlist_fix_scn, path_ff_fig, f'{scene_name}_fix', input_cfg)
             L_float_scn = err_time_plot_stat(errlist_float_scn, path_ff_fig, f'{scene_name}_float', input_cfg)
             L_fix_all = np.vstack((L_fix_all, L_fix_scn))
