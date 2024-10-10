@@ -8,14 +8,11 @@ import certifi
 import requests
 import urllib3
 from PyQt6 import QtWidgets, QtCore, QtGui
-from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QComboBox, QCheckBox, QMenu, QWidget, QHBoxLayout, \
-    QHeaderView, QProgressBar, QMessageBox, QProgressDialog
+from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QComboBox, QCheckBox, QMenu, QWidget, QHBoxLayout, QHeaderView, QProgressBar, QMessageBox, QProgressDialog
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 
 from ui_mainwindow import Ui_MainWindow
 from ui_selectreport import Ui_SelectReport
-
-
 
 CURRENT_VERSION = "1.0.0"  # 设置当前软件版本
 GITHUB_API_URL = "https://api.github.com/repos/awanoob/Data_Analysis_py/releases/latest"  # GitHub API URL
@@ -75,10 +72,17 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.ui.centralwidget.hide()
+
+
+        #self.centralwidget.show()
+
+
+
 
         self.load_stylesheet()
         self.setup_logging()
-        self.ui.action_open.triggered.connect(self.open_files)
+        self.ui.action_new_project.triggered.connect(self.create_new_project)
         self.setup_context_menu()
         self.ui.action_generate_report.triggered.connect(self.open_select_report_dialog)
         self.ui.tableWidget_2.itemChanged.connect(self.on_tableWidget_2_item_changed)
@@ -118,6 +122,34 @@ class MainWindow(QtWidgets.QMainWindow):
         filepaths, _ = QFileDialog.getOpenFileNames(self, "打开文件", "", "All Files (*)")
         if filepaths:
             self.display_file_paths(filepaths, is_true_value=False)
+
+    def create_new_project(self):
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "新建项目", "", "YAML Files (*.yaml);;All Files (*)"
+        )
+
+        if file_path:
+            if not file_path.endswith('.yaml'):
+                file_path += '.yaml'
+
+            try:
+                project_config = {
+                    'project_name': os.path.splitext(os.path.basename(file_path))[0],
+                    'created_time': QDateTime.currentDateTime().toString(),
+                    'files': [],
+                    'scenes': []
+                }
+
+                with open(file_path, 'w') as f:
+                    yaml.dump(project_config, f)
+
+                self.project_file = file_path
+                self.load_full_ui()
+
+                QMessageBox.information(self, "成功", "项目创建成功！")
+
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"创建项目文件失败：{str(e)}")
 
     def display_file_paths(self, file_paths, is_true_value):
         for file_path in file_paths:
