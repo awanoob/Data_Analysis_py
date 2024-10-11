@@ -1,0 +1,29 @@
+cal_alt_syserr: 2
+cal_att_syserr: 2
+cal_pos_syserr: 2
+cvrt2navplot: true
+data_agg_list: []
+data_agg_truth: ''
+data_frq: []
+data_frq_truth: ''
+dev_name_list: []
+era_auto_all: false
+era_list:
+  Scene: []
+  end_time: []
+  start_time: []
+out2car_coor: false
+output_cep: false
+output_fig: true
+output_multi_fig: true
+path_eracsv: ''
+path_in_list: []
+path_proj: C:/Users/admin/OneDrive/python/Data_analysis_py/main_func/pyqt6
+path_truth: ''
+usr_def_syserr_h: -3
+usr_def_syserr_list: []
+usr_def_syserr_p: -3
+usr_def_syserr_r: -3
+usr_def_syserr_x: -3
+usr_def_syserr_y: -3
+usr_def_syserr_z: -3

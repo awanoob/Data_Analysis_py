@@ -3,13 +3,13 @@ import os
 import sys
 import logging
 from urllib.parse import urlparse
-
+import yaml
 import certifi
 import requests
 import urllib3
 from PyQt6 import QtWidgets, QtCore, QtGui
 from PyQt6.QtWidgets import QFileDialog, QTableWidgetItem, QComboBox, QCheckBox, QMenu, QWidget, QHBoxLayout, QHeaderView, QProgressBar, QMessageBox, QProgressDialog
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QDateTime
 
 from ui_mainwindow import Ui_MainWindow
 from ui_selectreport import Ui_SelectReport
@@ -73,17 +73,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.centralwidget.hide()
-
-
-        #self.centralwidget.show()
-
-
-
-
         self.load_stylesheet()
         self.setup_logging()
-        self.ui.action_new_project.triggered.connect(self.create_new_project)
         self.setup_context_menu()
+
+
+        self.ui.action_new_project.triggered.connect(self.new_project)
+        self.ui.action_open_project.triggered.connect(self.open_project)
+
+
+
+
         self.ui.action_generate_report.triggered.connect(self.open_select_report_dialog)
         self.ui.tableWidget_2.itemChanged.connect(self.on_tableWidget_2_item_changed)
         self.ui.tableWidget.itemChanged.connect(self.on_tableWidget_item_changed)
@@ -97,33 +97,34 @@ class MainWindow(QtWidgets.QMainWindow):
         self.time_data = self.get_tableWidget_2_data()
 
     def load_stylesheet(self):
+        # 从外部文件加载样式表
         with open('qt6_style.qss', 'r', encoding='utf-8') as f:
             self.setStyleSheet(f.read())
 
     def setup_logging(self):
+        # 将日志输出到 QTextEdit
         text_edit_logger = QTextEditLogger(self.ui.logTextEdit)
         text_edit_logger.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         logging.getLogger().addHandler(text_edit_logger)
         logging.getLogger().setLevel(logging.INFO)
 
     def open_select_report_dialog(self):
+        # 打开报告选择对话框
         dialog = SelectReportDialog(self)
         dialog.exec()
 
-    def on_tableWidget_2_item_changed(self):
-        self.time_data = self.get_tableWidget_2_data()
-        logging.info("当前tableWidget_2中的数据：%s", self.time_data)
 
     def on_tableWidget_item_changed(self):
         self.file_data = self.get_tableWidget_data()
         logging.info("当前tableWidget中的数据：%s", self.file_data)
+    def on_tableWidget_2_item_changed(self):
+        self.time_data = self.get_tableWidget_2_data()
+        logging.info("当前tableWidget_2中的数据：%s", self.time_data)
 
-    def open_files(self):
-        filepaths, _ = QFileDialog.getOpenFileNames(self, "打开文件", "", "All Files (*)")
-        if filepaths:
-            self.display_file_paths(filepaths, is_true_value=False)
 
-    def create_new_project(self):
+
+
+    def new_project(self):
         file_path, _ = QFileDialog.getSaveFileName(
             self, "新建项目", "", "YAML Files (*.yaml);;All Files (*)"
         )
@@ -131,25 +132,60 @@ class MainWindow(QtWidgets.QMainWindow):
         if file_path:
             if not file_path.endswith('.yaml'):
                 file_path += '.yaml'
-
             try:
                 project_config = {
-                    'project_name': os.path.splitext(os.path.basename(file_path))[0],
-                    'created_time': QDateTime.currentDateTime().toString(),
-                    'files': [],
-                    'scenes': []
+                    'path_proj': os.path.dirname(file_path),
+                    'path_in_list': [],
+                    'path_truth': '',
+                    'path_eracsv': '',
+                    'data_agg_list': [],
+                    'data_agg_truth': '',
+                    'data_frq': [],
+                    'data_frq_truth': '',
+                    'dev_name_list': [],
+                    'era_list':{'Scene':[], 'start_time':[], 'end_time':[]},
+                    'cvrt2navplot': True,
+                    'out2car_coor': False,
+                    'era_auto_all': False,
+                    'output_cep': False,
+                    'output_fig': True,
+                    'output_multi_fig': True,
+                    'usr_def_syserr_x': -3,
+                    'usr_def_syserr_y': -3,
+                    'usr_def_syserr_z': -3,
+                    'usr_def_syserr_r': -3,
+                    'usr_def_syserr_p': -3,
+                    'usr_def_syserr_h': -3,
+                    'usr_def_syserr_list': [],
+                    'cal_pos_syserr': 2,
+                    'cal_alt_syserr': 2,
+                    'cal_att_syserr': 2
                 }
 
                 with open(file_path, 'w') as f:
                     yaml.dump(project_config, f)
 
-                self.project_file = file_path
-                self.load_full_ui()
-
                 QMessageBox.information(self, "成功", "项目创建成功！")
-
+                self.ui.centralwidget.show()
             except Exception as e:
                 QMessageBox.critical(self, "错误", f"创建项目文件失败：{str(e)}")
+
+
+    def open_project(self):
+        filepath, _ = QFileDialog.getOpenFileName(self, "打开工程", "", "YAML Files (*.yaml);;All Files (*)")
+        if filepath:
+            with open(filepath, 'r') as f:
+                project_config = yaml.safe_load(f)
+            self.ui.centralwidget.show()
+
+
+
+    def add_data(self):
+        filepaths, _ = QFileDialog.getOpenFileNames(self, "打开文件", "", "All Files (*)")
+        if filepaths:
+            self.display_file_paths(filepaths, is_true_value=False)
+
+
 
     def display_file_paths(self, file_paths, is_true_value):
         for file_path in file_paths:

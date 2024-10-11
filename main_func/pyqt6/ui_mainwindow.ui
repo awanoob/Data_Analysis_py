@@ -223,8 +223,8 @@
      <string>文件</string>
     </property>
     <addaction name="action_new_project"/>
-    <addaction name="action_save_project"/>
     <addaction name="action_open_project"/>
+    <addaction name="action_save_project"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -251,12 +251,12 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="action_save_project">
+  <action name="action_open_project">
    <property name="text">
     <string>打开工程</string>
    </property>
   </action>
-  <action name="action_open_project">
+  <action name="action_save_project">
    <property name="text">
     <string>保存</string>
    </property>
