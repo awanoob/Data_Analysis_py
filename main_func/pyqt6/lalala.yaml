@@ -17,8 +17,8 @@ output_cep: false
 output_fig: true
 output_multi_fig: true
 path_eracsv: ''
-path_in_list: []
-path_proj: C:/Users/admin/OneDrive/python/Data_analysis_py/main_func/pyqt6
+path_in_list: ["C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/pyqt6/设备轨迹.navplot","C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/pyqt6/设备轨迹.navplot"]
+path_proj: C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/pyqt6
 path_truth: ''
 usr_def_syserr_h: -3
 usr_def_syserr_list: []

@@ -68,33 +68,69 @@ class DownloadThread(QThread):
         self.finished_signal.emit(self.save_path)
 
 class MainWindow(QtWidgets.QMainWindow):
+    # 项目配置定义
+    project_config = {
+        'path_proj': '',
+        'data': [],
+        'era_list': [],
+        'cvrt2navplot': True,
+        'out2car_coor': False,
+        'era_auto_all': False,
+        'output_cep': False,
+        'output_fig': True,
+        'output_multi_fig': True,
+        'usr_def_syserr_x': -3,
+        'usr_def_syserr_y': -3,
+        'usr_def_syserr_z': -3,
+        'usr_def_syserr_r': -3,
+        'usr_def_syserr_p': -3,
+        'usr_def_syserr_h': -3,
+        'usr_def_syserr_list': [],
+        'cal_pos_syserr': 2,
+        'cal_alt_syserr': 2,
+        'cal_att_syserr': 2
+    }
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.unsaved_changes = None
+
+
+        # 加载 UI
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.centralwidget.hide()
+        # 加载样式表
         self.load_stylesheet()
+        # 设置日志输出
         self.setup_logging()
+        # 设置项目配置
         self.setup_context_menu()
-
-
+        # 设置菜单栏
         self.ui.action_new_project.triggered.connect(self.new_project)
         self.ui.action_open_project.triggered.connect(self.open_project)
-
-
-
+        self.ui.action_save_project.triggered.connect(self.save_project)
+        self.ui.action_add_data.triggered.connect(self.add_data)
 
         self.ui.action_generate_report.triggered.connect(self.open_select_report_dialog)
-        self.ui.tableWidget_2.itemChanged.connect(self.on_tableWidget_2_item_changed)
-        self.ui.tableWidget.itemChanged.connect(self.on_tableWidget_item_changed)
-        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # self.ui.tableWidget_2.itemChanged.connect(self.on_tableWidget_2_item_changed)
+        # self.ui.tableWidget.itemChanged.connect(self.on_tableWidget_item_changed)
+
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+        self.ui.tableWidget.setColumnWidth(0, 400)
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        self.ui.tableWidget.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+
+
+
         self.ui.tableWidget_2.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.ui.pushButton.clicked.connect(self.calculate_error_with_progress)
 
         self.check_for_updates()
 
         self.file_data = []
-        self.time_data = self.get_tableWidget_2_data()
+        # self.time_data = self.get_tableWidget_2_data()
 
     def load_stylesheet(self):
         # 从外部文件加载样式表
@@ -113,110 +149,214 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = SelectReportDialog(self)
         dialog.exec()
 
-
-    def on_tableWidget_item_changed(self):
-        self.file_data = self.get_tableWidget_data()
-        logging.info("当前tableWidget中的数据：%s", self.file_data)
-    def on_tableWidget_2_item_changed(self):
-        self.time_data = self.get_tableWidget_2_data()
-        logging.info("当前tableWidget_2中的数据：%s", self.time_data)
-
-
-
+    # def on_tableWidget_item_changed(self):
+    #     self.file_data = self.get_tableWidget_data()
+    #     logging.info("当前tableWidget中的数据：%s", self.file_data)
+    # def on_tableWidget_2_item_changed(self):
+    #     self.time_data = self.get_tableWidget_2_data()
+    #     logging.info("当前tableWidget_2中的数据：%s", self.time_data)
 
     def new_project(self):
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "新建项目", "", "YAML Files (*.yaml);;All Files (*)"
-        )
+        """新建一个项目"""
+        # 检查是否有未保存的更改
+        if self.check_unsaved_changes():
+            reply = QMessageBox.question(
+                self, "保存更改", "是否要保存当前项目的更改？",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self.save_project()
+            elif reply == QMessageBox.StandardButton.Cancel:
+                return
 
+        # 选择保存路径
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "新建项目", self.get_last_directory(), "YAML Files (*.yaml);;All Files (*)"
+        )
+        # 创建项目文件
         if file_path:
             if not file_path.endswith('.yaml'):
                 file_path += '.yaml'
             try:
-                project_config = {
-                    'path_proj': os.path.dirname(file_path),
-                    'path_in_list': [],
-                    'path_truth': '',
-                    'path_eracsv': '',
-                    'data_agg_list': [],
-                    'data_agg_truth': '',
-                    'data_frq': [],
-                    'data_frq_truth': '',
-                    'dev_name_list': [],
-                    'era_list':{'Scene':[], 'start_time':[], 'end_time':[]},
-                    'cvrt2navplot': True,
-                    'out2car_coor': False,
-                    'era_auto_all': False,
-                    'output_cep': False,
-                    'output_fig': True,
-                    'output_multi_fig': True,
-                    'usr_def_syserr_x': -3,
-                    'usr_def_syserr_y': -3,
-                    'usr_def_syserr_z': -3,
-                    'usr_def_syserr_r': -3,
-                    'usr_def_syserr_p': -3,
-                    'usr_def_syserr_h': -3,
-                    'usr_def_syserr_list': [],
-                    'cal_pos_syserr': 2,
-                    'cal_alt_syserr': 2,
-                    'cal_att_syserr': 2
-                }
+                # 创建一个空的项目配置文件
 
+                project_config = self.project_config
+                project_config['path_proj'] = file_path
                 with open(file_path, 'w') as f:
-                    yaml.dump(project_config, f)
+                    yaml.dump(project_config, f, allow_unicode=True)
+
+                self.ui.centralwidget.show()
+                self.unsaved_changes = False  # 重置未保存标记
+
+
+                self.set_last_directory(os.path.dirname(file_path))  # 保存最后的目录路径
+
 
                 QMessageBox.information(self, "成功", "项目创建成功！")
-                self.ui.centralwidget.show()
+                self.project_config['path_proj'] = file_path  # 记录当前项目路径
+                self.update_ui_from_project_config(project_config)
             except Exception as e:
                 QMessageBox.critical(self, "错误", f"创建项目文件失败：{str(e)}")
 
 
+
     def open_project(self):
-        filepath, _ = QFileDialog.getOpenFileName(self, "打开工程", "", "YAML Files (*.yaml);;All Files (*)")
-        if filepath:
-            with open(filepath, 'r') as f:
-                project_config = yaml.safe_load(f)
-            self.ui.centralwidget.show()
+        """打开项目配置文件"""
+        if self.check_unsaved_changes():
+            reply = QMessageBox.question(
+                self, "保存更改", "是否要保存当前项目的更改？",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self.save_project()
+            elif reply == QMessageBox.StandardButton.Cancel:
+                return
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "打开工程", self.get_last_directory(), "YAML Files (*.yaml);;All Files (*)"
+        )
+
+        if file_path:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    project_config = yaml.safe_load(f)
+
+                # 根据打开的项目文件内容更新界面状态...
+                self.update_ui_from_project_config(project_config)
+
+                self.ui.centralwidget.show()
+                self.unsaved_changes = False  # 重置未保存标记
+                self.set_last_directory(os.path.dirname(file_path))  # 保存最后的目录路径
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"打开项目文件失败：{str(e)}")
+
+    def save_project(self):
+        """保存项目配置到文件"""
+        try:
+            if not hasattr(self, 'current_project_file') or not self.current_project_file:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self, "保存项目", self.get_last_directory(), "YAML Files (*.yaml);;All Files (*)"
+                )
+                if file_path:
+                    if not file_path.endswith('.yaml'):
+                        file_path += '.yaml'
+                    self.project_config['path_proj'] = file_path
+                else:
+                    QMessageBox.warning(self, "警告", "请先创建或打开一个项目。")
+                    return
+
+            with open(self.current_project_file, 'w') as f:
+                yaml.dump(self.project_config, f, allow_unicode=True)
+
+            QMessageBox.information(self, "成功", "项目保存成功！")
+            self.unsaved_changes = False  # 重置未保存标记
+            self.set_last_directory(os.path.dirname(self.current_project_file))  # 保存最后的目录路径
+
+        except Exception as e:
+            QMessageBox.critical(self, "错误", f"保存项目文件失败：{str(e)}")
+
+    def update_ui_from_project_config(self, project_config):
+        """根据当前的项目配置更新UI控件"""
+        # 清空表格
+        self.ui.tableWidget.setRowCount(0)
+        self.ui.tableWidget_2.setRowCount(0)
+
+        # 更新数据表格
+        for data in project_config['data']:
+            row_position = self.ui.tableWidget.rowCount()
+            self.ui.tableWidget.insertRow(row_position)
+
+            # 使用相同的辅助函数创建控件,并传入初始数据
+            self.create_table_controls(row_position, data)
+
+        # 更新时间段表格
+        for era in project_config['era_list']:
+            row_position = self.ui.tableWidget_2.rowCount()
+            self.ui.tableWidget_2.insertRow(row_position)
+            self.ui.tableWidget_2.setItem(row_position, 0, QTableWidgetItem(era['scene']))
+            self.ui.tableWidget_2.setItem(row_position, 1, QTableWidgetItem(era['era_start']))
+            self.ui.tableWidget_2.setItem(row_position, 2, QTableWidgetItem(era['era_end']))
 
 
+
+        # 更新设备名称列表等其他项目配置
+        # 你可以在这里根据具体的配置内容更新其他UI组件
+
+
+    def check_unsaved_changes(self):
+        """检查是否有未保存的更改"""
+        if hasattr(self, 'unsaved_changes') and self.unsaved_changes:
+            return True
+        return False
+
+    def set_last_directory(self, path):
+        """保存最后访问的目录"""
+        self.last_directory = path
+
+    def get_last_directory(self):
+        """获取最后访问的目录"""
+        return getattr(self, 'last_directory', '')
 
     def add_data(self):
         filepaths, _ = QFileDialog.getOpenFileNames(self, "打开文件", "", "All Files (*)")
         if filepaths:
-            self.display_file_paths(filepaths, is_true_value=False)
+            for file_path in filepaths:
+                row_position = self.ui.tableWidget.rowCount()
+                self.ui.tableWidget.insertRow(row_position)
+                self.ui.tableWidget.setItem(row_position, 0, QTableWidgetItem(file_path))
 
+                # 使用辅助函数创建控件
+                controls = self.create_table_controls(row_position)
 
+                self.file_data.append({
+                    'path': file_path,
+                    'format': controls['format_combo'],
+                    'frequency': controls['freq_combo'],
+                    'is_true_value': controls['checkbox']
+                })
 
-    def display_file_paths(self, file_paths, is_true_value):
-        for file_path in file_paths:
-            row_position = self.ui.tableWidget.rowCount()
-            self.ui.tableWidget.insertRow(row_position)
+    def create_table_controls(self, row_position, data=None):
+        """
+        创建表格控件的辅助函数
 
-            self.ui.tableWidget.setItem(row_position, 0, QTableWidgetItem(os.path.basename(file_path)))
+        Args:
+            row_position: 行位置
+            data: 可选的初始数据字典,包含格式、频率和是否为基准值的信息
+        """
+        # 文件路径列保持不变,使用 QTableWidgetItem
+        if data:
+            self.ui.tableWidget.setItem(row_position, 0, QTableWidgetItem(data.get('data_path', '')))
 
-            format_combo = QComboBox()
-            format_combo.addItems(["navplot", "GPCHC"])
-            self.ui.tableWidget.setCellWidget(row_position, 1, format_combo)
+        # 创建格式下拉框
+        format_combo = QComboBox()
+        format_combo.addItems(["navplot", "GPCHC"])
+        if data and 'dev_name' in data:
+            index = format_combo.findText(data['dev_name'])
+            if index >= 0:
+                format_combo.setCurrentIndex(index)
+        self.ui.tableWidget.setCellWidget(row_position, 2, format_combo)
 
-            freq_combo = QComboBox()
-            freq_combo.addItems(["1Hz", "5Hz", "20Hz", "100Hz"])
-            self.ui.tableWidget.setCellWidget(row_position, 2, freq_combo)
+        # 创建频率下拉框
+        freq_combo = QComboBox()
+        freq_combo.addItems(["1Hz", "5Hz", "20Hz", "100Hz"])
+        if data and 'data_frq' in data:
+            index = freq_combo.findText(data['data_frq'])
+            if index >= 0:
+                freq_combo.setCurrentIndex(index)
+        self.ui.tableWidget.setCellWidget(row_position, 3, freq_combo)
 
-            centered_checkbox = CenteredCheckBox(is_true_value)
-            self.ui.tableWidget.setCellWidget(row_position, 3, centered_checkbox)
+        # 创建复选框
+        is_checked = False
+        if data and 'is_bchmk' in data:
+            is_checked = data['is_bchmk'].lower() == 'true'
+        centered_checkbox = CenteredCheckBox(is_checked)
+        self.ui.tableWidget.setCellWidget(row_position, 4, centered_checkbox)
 
-            self.file_data.append({
-                'path': file_path,
-                'format': format_combo,
-                'frequency': freq_combo,
-                'is_true_value': centered_checkbox.checkbox
-            })
-
-    def get_tableWidget_2_data(self):
-        return self.get_table_data(self.ui.tableWidget_2)
-
-    def get_tableWidget_data(self):
-        return self.get_table_data(self.ui.tableWidget)
+        return {
+            'format_combo': format_combo,
+            'freq_combo': freq_combo,
+            'checkbox': centered_checkbox.checkbox
+        }
 
     def get_table_data(self, table_widget):
         table_data = []
