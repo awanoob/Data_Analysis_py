@@ -3,11 +3,11 @@ cal_att_syserr: 2
 cal_pos_syserr: 2
 cvrt2navplot: true
 data:
-- data_format: '0'
-  data_frq: '0'
+- data_format: 'GPCHC'
+  data_frq: '5Hz'
   data_path: '0'
   dev_name: '0'
-  is_bchmk: '0'
+  is_bchmk: 'true'
 - data_format: '1'
   data_frq: '1'
   data_path: '1'
@@ -59,7 +59,7 @@ out2car_coor: false
 output_cep: false
 output_fig: true
 output_multi_fig: true
-path_proj: C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/pyqt6/test.yaml
+path_proj: C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/window/test.yaml
 usr_def_syserr_h: -3
 usr_def_syserr_list: []
 usr_def_syserr_p: -3

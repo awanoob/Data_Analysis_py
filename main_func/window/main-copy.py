@@ -67,6 +67,7 @@ class DownloadThread(QThread):
 
         self.finished_signal.emit(self.save_path)
 
+
 class MainWindow(QtWidgets.QMainWindow):
     # 项目配置定义
     project_config = {
@@ -92,6 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
     }
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.current_project_file = None
         self.unsaved_changes = None
 
 
@@ -266,7 +268,7 @@ class MainWindow(QtWidgets.QMainWindow):
             row_position = self.ui.tableWidget.rowCount()
             self.ui.tableWidget.insertRow(row_position)
 
-            # 使用相同的辅助函数创建控件,并传入初始数据
+            # 使用函数创建控件,并传入数据
             self.create_table_controls(row_position, data)
 
         # 更新时间段表格
@@ -298,22 +300,15 @@ class MainWindow(QtWidgets.QMainWindow):
         return getattr(self, 'last_directory', '')
 
     def add_data(self):
+        """添加数据文件"""
         filepaths, _ = QFileDialog.getOpenFileNames(self, "打开文件", "", "All Files (*)")
         if filepaths:
             for file_path in filepaths:
                 row_position = self.ui.tableWidget.rowCount()
                 self.ui.tableWidget.insertRow(row_position)
                 self.ui.tableWidget.setItem(row_position, 0, QTableWidgetItem(file_path))
+                self.create_table_controls(row_position)
 
-                # 使用辅助函数创建控件
-                controls = self.create_table_controls(row_position)
-
-                self.file_data.append({
-                    'path': file_path,
-                    'format': controls['format_combo'],
-                    'frequency': controls['freq_combo'],
-                    'is_true_value': controls['checkbox']
-                })
 
     def create_table_controls(self, row_position, data=None):
         """
@@ -330,8 +325,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # 创建格式下拉框
         format_combo = QComboBox()
         format_combo.addItems(["navplot", "GPCHC"])
-        if data and 'dev_name' in data:
-            index = format_combo.findText(data['dev_name'])
+        if data and 'data_format' in data:
+            index = format_combo.findText(data['data_format'])
             if index >= 0:
                 format_combo.setCurrentIndex(index)
         self.ui.tableWidget.setCellWidget(row_position, 2, format_combo)
@@ -351,28 +346,6 @@ class MainWindow(QtWidgets.QMainWindow):
             is_checked = data['is_bchmk'].lower() == 'true'
         centered_checkbox = CenteredCheckBox(is_checked)
         self.ui.tableWidget.setCellWidget(row_position, 4, centered_checkbox)
-
-        return {
-            'format_combo': format_combo,
-            'freq_combo': freq_combo,
-            'checkbox': centered_checkbox.checkbox
-        }
-
-    def get_table_data(self, table_widget):
-        table_data = []
-        for row in range(table_widget.rowCount()):
-            row_data = []
-            for column in range(table_widget.columnCount()):
-                cell_widget = table_widget.cellWidget(row, column)
-                if isinstance(cell_widget, QComboBox):
-                    row_data.append(cell_widget.currentText())
-                elif isinstance(cell_widget, CenteredCheckBox):
-                    row_data.append(cell_widget.checkbox.isChecked())
-                else:
-                    item = table_widget.item(row, column)
-                    row_data.append(item.text() if item else '')
-            table_data.append(row_data)
-        return table_data
 
     def setup_context_menu(self):
         self.ui.tableWidget.customContextMenuRequested.connect(self.show_tableWidget_context_menu)
@@ -414,7 +387,41 @@ class MainWindow(QtWidgets.QMainWindow):
         logging.info("误差计算完成：%s", error_result)
         return error_result
 
+    def get_table1_data(self, table_widget):
+        table_data = []
+        for row in range(table_widget.rowCount()):
+            table_data.append({
+                'data_path': table_widget.item(row, 0).text(),
+                'dev_name': table_widget.item(row, 1).text(),
+                'data_format': table_widget.cellWidget(row, 2).currentText(),
+                'data_frq': table_widget.cellWidget(row, 3).currentText(),
+                'is_bchmk': table_widget.cellWidget(row, 4).checkbox.isChecked()
+            })
+        return table_data
+
+    def get_table2_data(self, table_widget):
+        table_data = []
+        for row in range(table_widget.rowCount()):
+            table_data.append({
+                'scene': table_widget.item(row, 0).text(),
+                'era_start': table_widget.item(row, 1).text(),
+                'era_end': table_widget.item(row, 2).text()
+            })
+        return table_data
+
+
     def calculate_error_with_progress(self):
+        """
+        获取当前界面两个表格的数据，把数据保存到.yaml文件中，然后计算误差
+        """
+        project_config = self.project_config
+        project_config['data'] = self.get_table1_data(self.ui.tableWidget)
+        project_config['era_list'] = self.get_table2_data(self.ui.tableWidget_2)
+        project_config['path_proj'] = self.current_project_file
+
+        with open(self.current_project_file, 'w') as f:
+            yaml.dump(project_config, f, allow_unicode=True)
+
         progress_bar = self.ui.progressBar
         for i in range(101):
             QtCore.QThread.msleep(20)
@@ -423,6 +430,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         result = self.calculate_error()
         logging.info("计算结果：%s", result)
+
+
+
+
+
 
     def get_proxy_settings(self):
         """从配置文件或环境变量中读取代理设置"""
