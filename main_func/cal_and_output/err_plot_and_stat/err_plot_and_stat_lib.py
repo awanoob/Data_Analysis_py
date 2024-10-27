@@ -34,7 +34,8 @@ def fig_plt(xaxis_list, yaxis_list, title: list, xlabel: str, ylabel: str, fig_p
     for i, yaxis_idct in enumerate(yaxis_list):
         for xaxis_dev, yaxis_dev, color_inturn in zip(xaxis_list, yaxis_idct, color_lib.values()):
             ax[i].plot(xaxis_dev, yaxis_dev, color=color_inturn, linewidth=0.5)
-        ax[i].set_title(title[i], fontdict={'family': 'Microsoft YaHei', 'size': 16})
+        ax[i].ticklabel_format(axis='x', style='plain')
+        ax[i].set_title(title[i], fontdict={'family': 'Microsoft YaHei', 'size': 16, 'weight': 'bold'})
         ax[i].set_xlabel(xlabel, fontdict={'family': 'Microsoft YaHei', 'size': 14})
         ax[i].set_ylabel(ylabel, fontdict={'family': 'Microsoft YaHei', 'size': 14})
         ax[i].grid(color='lightgray', linestyle='-', linewidth=0.5)

@@ -44,7 +44,8 @@ def cal_Func(yaml_path: str):
 
     for i in range(len(data_test)):
         # 根据被测数据文件名称生成项目子路径
-        path_proj_dev = join(input_cfg['path_proj'], data_test[i]['dev_name'])
+        path_proj_dev = join(input_cfg['path_proj'], 'result_all', data_test[i]['dev_name'])
+        input_cfg['path_proj_dev'] = path_proj_dev
         # 创建项目子路径
         if not exists(path_proj_dev):
             makedirs(path_proj_dev)
@@ -97,4 +98,9 @@ def cal_Func(yaml_path: str):
         multi_dev_err_plot(multi_dev_err_dict, input_cfg)
 
     # 输出报告
-    report_gen_func()
+    report_gen_func(input_cfg)
+
+
+# test
+if __name__ == '__main__':
+    cal_Func(r"J:\CODE\VSCode\Python\pytest\data_analysis_test\test.yaml")
