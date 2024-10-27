@@ -1,5 +1,5 @@
 import numpy as np
-from error_cal.error_cal_lib import *
+from cal_and_output.error_cal.error_cal_lib import *
 
 
 def err_cal_func(array_bchmk: np.ndarray, array_test: np.ndarray, input_cfg: dict) -> np.ndarray:

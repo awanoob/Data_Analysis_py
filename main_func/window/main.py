@@ -9,7 +9,10 @@ from utils.logger import setup_logging
 from utils.updater import UpdateManager
 from utils.project_manager import ProjectManager
 from widgets.table_manager import TableManager
-from main_func.cal_and_output.cal_function import cal_Func
+from os import path
+# 这里相当于把相对路径 .. 添加到pythonpath中
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+from cal_and_output.cal_function import cal_Func
 
 
 class SelectReportDialog(QtWidgets.QDialog):

@@ -8,10 +8,13 @@ from docx.oxml import OxmlElement
 from docx.shared import Cm, Pt
 from docx.oxml.ns import qn
 
-import report_output.styles as styles
+import cal_and_output.report_output.styles as styles
 import pandas as pd
 import os
 import glob
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 打开模板文档
 doc = Document('./report_output/default/module_default.docx')

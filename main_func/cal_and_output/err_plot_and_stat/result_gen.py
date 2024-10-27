@@ -1,8 +1,8 @@
 import numpy as np
 from os.path import join, exists
 from os import makedirs
-from data_read_and_decode.data_rnd_lib import output_navplot
-from err_plot_and_stat.err_plot_and_stat_lib import *
+from cal_and_output.data_read_and_decode.data_rnd_lib import output_navplot
+from cal_and_output.err_plot_and_stat.err_plot_and_stat_lib import *
 import pandas as pd
 
 
