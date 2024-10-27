@@ -3,14 +3,13 @@ import os
 import logging
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtCore import Qt
-from main_func.window.ui_mainwindow import Ui_MainWindow
-from main_func.window.ui_selectreport import Ui_SelectReport
-from main_func.window.utils.logger import setup_logging
-from main_func.window.utils.updater import UpdateManager
-from main_func.window.utils.project_manager import ProjectManager
-from main_func.window.widgets.table_manager import TableManager
-from os import path
-from main_func.cal_and_output.cal_function import cal_Func
+from window.ui_mainwindow import Ui_MainWindow
+from window.ui_selectreport import Ui_SelectReport
+from window.utils.logger import setup_logging
+from window.utils.updater import UpdateManager
+from window.utils.project_manager import ProjectManager
+from window.widgets.table_manager import TableManager
+from cal_and_output.cal_function import cal_Func
 
 
 class SelectReportDialog(QtWidgets.QDialog):

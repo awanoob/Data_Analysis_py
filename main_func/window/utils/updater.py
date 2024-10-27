@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox, QProgressDialog
 from PyQt6.QtCore import Qt
-from main_func.window.config.settings import CURRENT_VERSION, GITHUB_API_URL
+from window.config.settings import CURRENT_VERSION, GITHUB_API_URL
 
 class DownloadThread(QThread):
     progress_signal = pyqtSignal(int)

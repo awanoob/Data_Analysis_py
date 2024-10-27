@@ -7,12 +7,12 @@
 from os.path import join, exists
 from os import makedirs
 import numpy as np
-from main_func.cal_and_output.data_read_and_decode.data_rnd_lib import *
-from main_func.cal_and_output.error_cal.err_cal import err_cal_func
-from main_func.cal_and_output.err_plot_and_stat.err_plot_and_stat_lib import *
-from main_func.cal_and_output.err_plot_and_stat.result_gen import result_gen_func
-from main_func.cal_and_output.report_output.report_gen import report_gen_func
-from main_func.cal_and_output.proj_cfg_read import yaml_read
+from cal_and_output.data_read_and_decode.data_rnd_lib import *
+from cal_and_output.error_cal.err_cal import err_cal_func
+from cal_and_output.err_plot_and_stat.err_plot_and_stat_lib import *
+from cal_and_output.err_plot_and_stat.result_gen import result_gen_func
+from cal_and_output.report_output.report_gen import report_gen_func
+from cal_and_output.proj_cfg_read import yaml_read
 
 
 def cal_Func(yaml_path: str):

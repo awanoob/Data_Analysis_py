@@ -2,7 +2,7 @@ import os
 import yaml
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
-from main_func.window.config.settings import DEFAULT_PROJECT_CONFIG
+from window.config.settings import DEFAULT_PROJECT_CONFIG
 
 class ProjectManager:
     def __init__(self, main_window):
