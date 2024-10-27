@@ -57,7 +57,8 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
         L_all = np.vstack((L_all, L_scn))
 
         # 输出单场景固定解，浮动解误差时间图像和统计报告
-        if errlist_scn[:, [13]].all() == 1 or np.sum(errlist_scn[:, [13]] == 6) / len(errlist_scn) > 0.8:
+        if (errlist_scn[:, [13]] == 1).all() or np.sum(errlist_scn[:, [13]] == 6) / len(errlist_scn) > 0.8:
+            print(f"场景{scene_name}固定解数据为空或判断为隧道场景，跳过")
             L_fix_scn = np.empty((0, 14))
             L_fix_all = np.vstack((L_fix_all, L_fix_scn))
             L_float_scn = np.empty((0, 14))

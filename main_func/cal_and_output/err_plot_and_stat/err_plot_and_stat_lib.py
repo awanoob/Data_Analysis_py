@@ -462,7 +462,7 @@ def multi_dev_err_plot(err_dict, input_cfg):
         if not exists(path_scene):
             makedirs(path_scene)
 
-        err_dict_scn = {k: np.array([]) for k in scn_dev_name_list}
+        err_dict_scn = {}
 
         # 按照设备和开始时间和结束时间划分数据
         for k in input_cfg['data_test']:

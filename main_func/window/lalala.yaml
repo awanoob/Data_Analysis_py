@@ -2,14 +2,24 @@ cal_alt_syserr: 2
 cal_att_syserr: 2
 cal_pos_syserr: 2
 cvrt2navplot: true
-data: []
-era_auto_all: false
+data:
+- data_format: navplot
+  data_frq: 1Hz
+  data_path: J:/CODE/VSCode/Python/python_proj/Data_Analysis_py/main_func/window/设备轨迹.navplot
+  dev_name: '830'
+  is_bchmk: false
+- data_format: navplot
+  data_frq: 1Hz
+  data_path: J:/CODE/VSCode/Python/python_proj/Data_Analysis_py/main_func/window/真值轨迹.navplot
+  dev_name: '1250'
+  is_bchmk: true
+era_auto_all: true
 era_list: []
 out2car_coor: false
 output_cep: false
 output_fig: true
 output_multi_fig: true
-path_proj: J:/CODE/VSCode/Python/python_proj/Data_Analysis_py/main_func/window/lalala.yaml
+path_proj: J:/CODE/VSCode/Python/python_proj/Data_Analysis_py/main_func/window/
 usr_def_syserr_h: -3
 usr_def_syserr_list: []
 usr_def_syserr_p: -3

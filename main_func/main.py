@@ -44,8 +44,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # 检查更新
         self.update_manager.check_for_updates()
 
-        self.current_project_file = None # 当前打开的项目文件
-        self.unsaved_changes = False # 项目是否有未保存的更改
+        self.current_project_file = None  # 当前打开的项目文件
+        self.unsaved_changes = False  # 项目是否有未保存的更改
 
     def load_stylesheet(self):
         # 从外部文件加载样式表
@@ -65,7 +65,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # 连接计算按钮
         self.ui.pushButton.clicked.connect(self.calculate_error_with_progress)
-
 
     def open_select_report_dialog(self):
         # 打开报告选择对话框
@@ -90,7 +89,6 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QApplication.processEvents()
 
         # 计算结果
-        # yaml_path = 
         cal_Func(self.project_manager.current_project_file)
     #     result = self.calculate_error()
     #     logging.info("计算结果：%s", result)
@@ -100,7 +98,6 @@ class MainWindow(QtWidgets.QMainWindow):
     #     error_result = "误差结果"  # 这里替换为实际的计算逻辑
     #     logging.info("误差计算完成：%s")
     #     return error_result
-
 
 
 if __name__ == '__main__':

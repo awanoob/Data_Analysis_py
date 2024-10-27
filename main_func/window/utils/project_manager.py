@@ -31,7 +31,7 @@ class ProjectManager:
             if not file_path.endswith('.yaml'):
                 file_path += '.yaml'
             try:
-                self.project_config['path_proj'] = file_path
+                self.project_config['path_proj'] = os.path.dirname(file_path)
                 with open(file_path, 'w') as f:
                     yaml.dump(self.project_config, f, allow_unicode=True)
 
@@ -62,7 +62,7 @@ class ProjectManager:
 
         if file_path:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, 'r') as f:
                     self.project_config = yaml.safe_load(f)
 
                 self.current_project_file = file_path

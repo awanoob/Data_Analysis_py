@@ -17,12 +17,10 @@ from cal_and_output.proj_cfg_read import yaml_read
 
 def cal_Func(yaml_path: str):
     input_cfg = yaml_read(yaml_path)
-    if len(input_cfg['data']) >= 1 and input_cfg['output_multi_fig']:
-        multi_dev_err_dict = {k: np.array([]) for k in input_cfg['data']}
 
     # 拆分data列表，分为真值和被测数据列表，分别读取数据
     # 获取真值数据的索引
-    indices = [index for index, d in enumerate(input_cfg['data']) if d.get('is_bchmk') == True]
+    indices = [index for index, d in enumerate(input_cfg['data']) if d.get('is_bchmk') is True]
     if len(indices) == 0:
         print('未设置真值数据，无法进行计算，请检查文件设置')
         return
@@ -31,10 +29,15 @@ def cal_Func(yaml_path: str):
         return
     data_bchmk = input_cfg['data'][indices[0]]
     # 获取被测数据列表
-    data_test = input_cfg['data'].pop(indices[0])
+    del input_cfg['data'][indices[0]]
+    data_test = input_cfg['data']
     # 添加进input_cfg
     input_cfg['data_bchmk'] = data_bchmk
     input_cfg['data_test'] = data_test
+
+    # 多设备误差对比误差列表字典初始化
+    if len(input_cfg['data']) >= 1 and input_cfg['output_multi_fig']:
+        multi_dev_err_dict = {k['dev_name']: np.array([]) for k in data_test}
 
     # 基准设备数据读取
     array_bchmk_ori = data_decode(data_bchmk['data_path'], data_bchmk['data_format'])
@@ -58,13 +61,13 @@ def cal_Func(yaml_path: str):
                 output_navplot(array_test_ori, nav_output_path_test)
 
         # 检查数据丢包
-        if data_bchmk['data_frq'] is not None and i == 0:
-            itv_chk_report_path = join(input_cfg['path_proj'], 'itv_chk_report_bchmk.txt')
-            pack_lost_chk(array_bchmk_ori, data_bchmk['data_frq'], itv_chk_report_path)
+        # if data_bchmk['data_frq'] is not None and i == 0:
+        #     itv_chk_report_path = join(input_cfg['path_proj'], 'itv_chk_report_bchmk.txt')
+        #     pack_lost_chk(array_bchmk_ori, data_bchmk['data_frq'], itv_chk_report_path)
 
-        if data_test[i]['data_frq'] != '':
-            itv_chk_report_path = join(path_proj_dev, 'itv_chk_report_test.txt')
-            pack_lost_chk(array_test_ori, data_test[i]['data_frq'], itv_chk_report_path)
+        # if data_test[i]['data_frq'] != '':
+        #     itv_chk_report_path = join(path_proj_dev, 'itv_chk_report_test.txt')
+        #     pack_lost_chk(array_test_ori, data_test[i]['data_frq'], itv_chk_report_path)
 
         # 匹配相同时间戳的行
         # 提取相同时间戳列的索引
@@ -80,7 +83,7 @@ def cal_Func(yaml_path: str):
 
         # 自动添加全程场景
         if input_cfg['era_auto_all']:
-            input_cfg['era_list'].append({'scene': '.全程', 'era_start': [array_bchmk[0, 1]], 'era_end': [array_bchmk[-1, 1]]})
+            input_cfg['era_list'].append({'scene': '.全程', 'era_start': str(array_bchmk[0, 1]), 'era_end': str(array_bchmk[-1, 1])})
 
         # 生成图像和统计表结果
         result_gen_func(array_bchmk, array_test, errlist, path_proj_dev, input_cfg)
