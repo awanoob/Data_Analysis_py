@@ -10,6 +10,7 @@ from window.utils.updater import UpdateManager
 from window.utils.project_manager import ProjectManager
 from window.widgets.table_manager import TableManager
 from cal_and_output.cal_function import cal_Func
+from proxy.proxy_config import ProxyManager
 
 
 class SelectReportDialog(QtWidgets.QDialog):
@@ -101,6 +102,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == '__main__':
+    proxy_manager = ProxyManager()
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainWindow()
     main_window.show()

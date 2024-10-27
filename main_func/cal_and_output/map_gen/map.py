@@ -7,96 +7,204 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import os
 import time
+import logging
+from typing import List, Tuple, Union
+import tempfile
+from main_func.proxy.proxy_config import ProxyManager
 
 
-def create_map_with_lines_and_zoom(lines_data, output_path_full, output_path_zoomed):
-    """
-    创建两张地图：
-    1. 第一张地图绘制多条线并自动调整缩放级别以显示所有线段。
-    2. 第二张地图缩放到最大级别并聚焦到所有点的中心或随机选择一个点。
+class MapGenerator:
+    def __init__(self):
+        self.colors = [
+            '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+            '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+        ]
+        self.api_key = "baef27b004fae0eca6b5187854d3f1af"
+        self.proxy_manager = ProxyManager()
+        self._driver = None
 
-    参数：
-    lines_data: 列表的列表，每个子列表包含一条线的坐标点 [[(lat1, lon1), (lat2, lon2), ...], [...]]
-    output_path_full: 自动调整缩放的地图输出路径
-    output_path_zoomed: 缩放到最大级别的地图输出路径
-    """
+    def _create_chrome_driver(self):
+        """创建Chrome WebDriver，支持代理设置"""
+        try:
+            options = Options()
+            options.add_argument("--headless")
+            options.add_argument("--window-size=1920x1080")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument('--disable-gpu')
+            options.add_argument('--disable-extensions')
+            options.add_argument('--disable-infobars')
+            options.add_argument('--ignore-certificate-errors')
 
-    # 计算所有坐标的边界
-    all_lats, all_lons = [], []
-    for line in lines_data:
-        lats, lons = zip(*line)
-        all_lats.extend(lats)
-        all_lons.extend(lons)
+            if self.proxy_manager.has_proxy:
+                proxy_url = self.proxy_manager.get_proxy_url()
+                if proxy_url:
+                    logging.info(f"使用代理：{proxy_url}")
+                    options.add_argument(f'--proxy-server={proxy_url}')
+                    if 'bypass' in self.proxy_manager.proxy_settings:
+                        bypass_list = ','.join(self.proxy_manager.proxy_settings['bypass'])
+                        options.add_argument(f'--proxy-bypass-list={bypass_list}')
 
-    # 计算地图中心和边界框
-    center = [np.mean(all_lats), np.mean(all_lons)]
-    bounds = [[min(all_lats), min(all_lons)], [max(all_lats), max(all_lons)]]
+            self._driver = webdriver.Chrome(
+                service=Service(ChromeDriverManager().install()),
+                options=options
+            )
+            self._driver.set_page_load_timeout(30)
+            self._driver.set_script_timeout(30)
+            return self._driver
 
-    # 随机选择一个点用于最大缩放
-    random_index = np.random.randint(0, len(all_lats))
-    random_point = [all_lats[random_index], all_lons[random_index]]
+        except Exception as e:
+            logging.error(f"创建Chrome WebDriver失败: {str(e)}")
+            raise
 
-    # 创建地图函数
-    def create_and_save_map(m, file_name, zoom_bounds=None):
-        # 绘制线段
-        for line in lines_data:
-            folium.PolyLine(locations=line, weight=2, color='blue', opacity=0.8).add_to(m)
-        # 调整地图视图
-        if zoom_bounds:
-            m.fit_bounds(zoom_bounds)
-        m.save(file_name)
+    def _cleanup_driver(self):
+        """清理WebDriver资源"""
+        try:
+            if self._driver:
+                self._driver.quit()
+                self._driver = None
+        except Exception as e:
+            logging.warning(f"清理WebDriver时出错: {str(e)}")
 
-        # 使用Selenium加载HTML并截图
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--window-size=1920x1080")
-        chrome_options.add_argument("--no-sandbox")
+    def _create_map(self, center: List[float], zoom: int) -> folium.Map:
+        """创建基础地图"""
+        m = folium.Map(location=center, zoom_start=zoom, tiles=None)
+        tianditu_url = (
+            "http://t7.tianditu.gov.cn/img_w/wmts?"
+            "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&"
+            "LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&"
+            f"TILEMATRIX={{z}}&TILEROW={{y}}&TILECOL={{x}}&tk={self.api_key}"
+        )
+        folium.TileLayer(
+            tiles=tianditu_url,
+            attr='天地图',
+            name='天地图影像图'
+        ).add_to(m)
+        return m
 
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-        driver.get(f'file://{os.path.abspath(file_name)}')
+    def _add_lines_to_map(self, map_obj: folium.Map, lines_data: List[List[Tuple[float, float]]]):
+        """向地图添加多条线"""
+        for i, line in enumerate(lines_data):
+            color = self.colors[i % len(self.colors)]
+            folium.PolyLine(
+                locations=line,
+                weight=2,
+                color=color,
+                opacity=0.8,
+                popup=f'轨迹 {i + 1}'
+            ).add_to(map_obj)
 
-        # 等待地图加载完成
-        time.sleep(5)
+        if len(lines_data) > 1:
+            legend_html = """
+                <div style="position: fixed; 
+                            bottom: 50px; right: 50px; width: 120px;
+                            border:2px solid grey; z-index:9999; 
+                            background-color:white;
+                            padding: 10px;
+                            font-size: 14px;">
+                    <p><strong>图例</strong></p>
+            """
+            for i in range(len(lines_data)):
+                color = self.colors[i % len(self.colors)]
+                legend_html += f"""
+                    <p>
+                        <span style="background-color: {color};
+                                    width: 15px;
+                                    height: 15px;
+                                    display: inline-block;
+                                    margin-right: 5px;"></span>
+                        轨迹 {i + 1}
+                    </p>
+                """
+            legend_html += "</div>"
+            map_obj.get_root().html.add_child(folium.Element(legend_html))
 
-        # 截图并保存
-        driver.save_screenshot(file_name.replace('.html', '.png'))
-        driver.quit()
+    def _save_map_screenshot(self, map_obj: folium.Map, output_path: str):
+        """保存地图截图，包含错误处理和资源清理"""
+        temp_html = None
+        try:
+            # 创建临时文件
+            fd, temp_html = tempfile.mkstemp(suffix='.html')
+            os.close(fd)  # 立即关闭文件描述符
 
-        # 删除临时HTML文件
-        # if os.path.exists(file_name):
-        #     os.remove(file_name)
+            # 保存地图到临时HTML文件
+            map_obj.save(temp_html)
 
-    # 第一张图：自动调整缩放
-    m_full = folium.Map(location=center, zoom_start=12, tiles=None)
-    tianditu_url = ("http://t7.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile"
-                    "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"
-                    "&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=baef27b004fae0eca6b5187854d3f1af")
-    folium.TileLayer(tiles=tianditu_url, attr='天地图', name='天地图影像图').add_to(m_full)
+            # 创建driver并获取截图
+            driver = self._create_chrome_driver()
+            driver.get(f'file://{os.path.abspath(temp_html)}')
+            time.sleep(3)  # 等待地图加载
+            driver.save_screenshot(output_path)
 
-    create_and_save_map(m_full, 'temp_map_full.html', zoom_bounds=bounds)
+        except Exception as e:
+            logging.error(f"保存地图截图失败: {str(e)}")
+            raise
+        finally:
+            # 清理资源
+            self._cleanup_driver()
+            # 删除临时文件
+            if temp_html and os.path.exists(temp_html):
+                try:
+                    os.unlink(temp_html)
+                except Exception as e:
+                    logging.warning(f"删除临时文件失败: {str(e)}")
 
-    # 检查文件是否存在并删除旧文件
-    if os.path.exists(output_path_full):
-        os.remove(output_path_full)
-    os.rename('temp_map_full.png', output_path_full)
+    def create_maps(self, lines_data: List[List[Tuple[float, float]]],
+                    output_path_full: str, output_path_zoomed: str):
+        """创建地图（全局视图和局部视图）"""
+        try:
+            # 计算所有点的边界
+            all_coords = [(lat, lon) for line in lines_data for lat, lon in line]
+            all_lats, all_lons = zip(*all_coords)
 
-    # 第二张图：缩放到最大，并聚焦到随机选择的点
-    m_zoomed = folium.Map(location=random_point, zoom_start=18, tiles=None)  # 缩放到最大
-    folium.TileLayer(tiles=tianditu_url, attr='天地图', name='天地图影像图').add_to(m_zoomed)
+            center = [np.mean(all_lats), np.mean(all_lons)]
+            bounds = [[min(all_lats), min(all_lons)], [max(all_lats), max(all_lons)]]
+            random_point = all_coords[np.random.randint(0, len(all_coords))]
 
-    create_and_save_map(m_zoomed, 'temp_map_zoomed.html')
+            # 创建两个地图
+            for is_zoomed, output_path in [(False, output_path_full), (True, output_path_zoomed)]:
+                m = self._create_map(
+                    random_point if is_zoomed else center,
+                    18 if is_zoomed else 12
+                )
+                self._add_lines_to_map(m, lines_data)
+                if not is_zoomed:
+                    m.fit_bounds(bounds)
 
-    # 检查文件是否存在并删除旧文件
-    if os.path.exists(output_path_zoomed):
-        os.remove(output_path_zoomed)
-    os.rename('temp_map_zoomed.png', output_path_zoomed)
+                self._save_map_screenshot(m, output_path)
+
+        except Exception as e:
+            logging.error(f"生成地图失败: {str(e)}")
+            raise
 
 
-if __name__ == "__main__":
-    # 读取数据
-    data = pd.read_csv("220prodec_rtkplot.txt", sep=" ", header=None)
-    lines_data = [(data.iloc[i, 2], data.iloc[i, 3]) for i in range(len(data))]
-    lines_data = [lines_data]
-    output_path_full = "output_map_full.png"
-    output_path_zoomed = "output_map_zoomed.png"
-    create_map_with_lines_and_zoom(lines_data, output_path_full, output_path_zoomed)
+def map_gen(datapaths: Union[str, List[str]]) -> None:
+    """生成地图的主函数"""
+    try:
+        if isinstance(datapaths, str):
+            datapaths = [datapaths]
+
+        lines_data = []
+        for datapath in datapaths:
+            try:
+                data = pd.read_csv(datapath, sep=" ", header=None)
+                if not data.empty:
+                    line_coords = [(row[3], row[4]) for row in data.itertuples()]
+                    lines_data.append(line_coords)
+            except Exception as e:
+                logging.warning(f"读取文件 {datapath} 失败: {str(e)}")
+                continue
+
+        if not lines_data:
+            raise ValueError("没有成功读取任何轨迹数据")
+
+        map_generator = MapGenerator()
+        map_generator.create_maps(
+            lines_data,
+            "output_map_full.png",
+            "output_map_zoomed.png"
+        )
+
+    except Exception as e:
+        logging.error(f"地图生成失败: {str(e)}")
+        raise

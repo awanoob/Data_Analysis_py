@@ -8,7 +8,7 @@ from docx.oxml import OxmlElement
 from docx.shared import Cm, Pt
 from docx.oxml.ns import qn
 
-import cal_and_output.report_output.styles as styles
+import main_func.cal_and_output.report_output.styles as styles
 import pandas as pd
 import os
 import glob
@@ -16,7 +16,7 @@ import sys
 
 
 # 打开模板文档
-doc = Document(r'./cal_and_output/report_output/default/module_default.docx')
+doc = Document(r'C:\Users\wyx\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
 
 default_section = doc.sections[0]
 
@@ -53,17 +53,23 @@ def get_xlsx_datas(folder_path):
     folder_paths = os.listdir(folder_path)
     filepaths = []
     for i in range(len(folder_paths)):
-        filepaths.append(folder_path + '\\' + folder_paths[i] + '\\数据统计.xlsx')
+        filepaths.append(folder_path + '\\' + folder_paths[i] + '\\' + folder_paths[i] + '_误差统计表.csv')
 
     # 使用字典存储每个文件夹名称与其对应的DataFrame
     xlsx_datas = {}
+    i = 0
     for filepath in filepaths:
         folder_name = os.path.basename(os.path.dirname(filepath))
-        xlsx_data = pd.read_excel(filepath, sheet_name='Sheet1')
-        # xlsx_data['场景'] = xlsx_data['场景'].fillna(method='ffill')
-        # 去除最后两列，固定率和距离
-        xlsx_data = xlsx_data.iloc[:, :-2]
-        xlsx_datas[folder_name] = xlsx_data
+        xlsx_data = pd.read_csv(filepath)
+
+        xlsx_datas[folder_name] = {}
+        # 读取场景、指标和误差
+        xlsx_datas[folder_name]['data'] = xlsx_data.iloc[:, :-2]
+        # 读取固定率
+        xlsx_datas[folder_name]['fix_ratio'] = xlsx_data.iloc[i, -2]
+        # 读取距离
+        xlsx_datas[folder_name]['distance'] = xlsx_data.iloc[i, -1]
+        i += 6
 
     return xlsx_datas
 
@@ -297,9 +303,9 @@ def write_chapter3():
     doc.add_paragraph('')
     doc.add_paragraph('航向角误差RMS汇总', style='Heading 2')
 
-def report_gen_func():
-    pic_folder_path = r"C:\Users\admin\Desktop\实时总\multi_err_figure"
-    xlsx_folder_path = r"C:\Users\admin\Desktop\实时总\分析结果"
+def report_gen_func(input_cfg):
+    pic_folder_path = input_cfg['multi_dev_err_path']
+    xlsx_folder_path = input_cfg['path_proj_dev']
     # 读取excel文件
 
     # 设置页脚信息
@@ -320,3 +326,12 @@ def report_gen_func():
     write_chapter3()
     # 保存文档
     doc.save(r'C:\Users\admin\Desktop\实时总\测试报告.docx')
+
+
+if __name__ == '__main__':
+    input_cfg = {
+        'multi_dev_err_path': r'C:\Users\wyx\OneDrive\python\Data_analysis_py\multi_dev_err_plot',
+        'path_proj_dev': r'C:\Users\wyx\OneDrive\python\Data_analysis_py\result_all'
+    }
+    report_gen_func(input_cfg)
+    sys.exit(0)
