@@ -12,11 +12,11 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
     L_float_all = np.empty((0, 14))
     L_dr_all = np.empty((0, 13))
     dev_name = path_main.split('\\')[-1]
-    for i in range(len(input_cfg['era_list']['Scene'])):
+    for i in range(len(input_cfg['era_list'])):
         # 获取场景名称和时间段
-        scene_name = input_cfg['era_list']['Scene'][i]
-        start_t_list = input_cfg['era_list']['start_time'][i]
-        end_t_list = input_cfg['era_list']['end_time'][i]
+        scene_name = input_cfg['era_list'][i]['scene']
+        start_t_list = input_cfg['era_list'][i]['era_start'].split(',')
+        end_t_list = input_cfg['era_list'][i]['era_end'].split(',')
 
         # 生成场景子路径
         path_scene = join(path_main, scene_name)
@@ -29,8 +29,8 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
 
         # 按照开始时间和结束时间划分数据
         for j in range(len(start_t_list)):
-            start_t = start_t_list[j]
-            end_t = end_t_list[j]
+            start_t = float(start_t_list[j])  # 将start_t从字符串转换为浮点数
+            end_t = float(end_t_list[j])      # 将end_t从字符串转换为浮点数
             indx = np.where((array_bchmk[:, [1]] >= start_t) & (array_bchmk[:, [1]] < end_t))[0]
 
             array_bchmk_scn_list.append(array_bchmk[indx])
@@ -80,7 +80,7 @@ def result_gen_func(array_bchmk: np.ndarray, array_test: np.ndarray, errlist: np
         if '隧道' in scene_name:
             # 多取30s数据，以保证出隧道误差统计的完整性
             errlist_scn = errlist[np.where((array_bchmk[:, [1]] >= start_t) & (array_bchmk[:, [1]] < end_t + 30))[0]]
-            L_dr_scn = dr_err_stat(errlist_scn, scene_name, input_cfg)
+            L_dr_scn = dr_err_stat(errlist_scn, scene_name)
             L_dr_all = np.vstack((L_dr_all, L_dr_scn))
 
     # 将ndarray转换为DataFrame

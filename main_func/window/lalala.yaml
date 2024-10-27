@@ -9,7 +9,7 @@ out2car_coor: false
 output_cep: false
 output_fig: true
 output_multi_fig: true
-path_proj: C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/window/lalala.yaml
+path_proj: J:/CODE/VSCode/Python/python_proj/Data_Analysis_py/main_func/window/lalala.yaml
 usr_def_syserr_h: -3
 usr_def_syserr_list: []
 usr_def_syserr_p: -3

@@ -1,7 +1,7 @@
 # widgets/table_manager.py
 from PyQt6.QtWidgets import (QTableWidgetItem, QComboBox, QMenu, QHeaderView,
                              QMessageBox, QFileDialog)
-from main_func.window.widgets.custom_widgets import CenteredCheckBox
+from widgets.custom_widgets import CenteredCheckBox
 import logging
 
 

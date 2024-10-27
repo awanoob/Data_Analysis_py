@@ -9,6 +9,7 @@ from utils.logger import setup_logging
 from utils.updater import UpdateManager
 from utils.project_manager import ProjectManager
 from widgets.table_manager import TableManager
+from main_func.cal_and_output.cal_function import cal_Func
 
 
 class SelectReportDialog(QtWidgets.QDialog):
@@ -89,14 +90,16 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QApplication.processEvents()
 
         # 计算结果
-        result = self.calculate_error()
-        logging.info("计算结果：%s", result)
+        # yaml_path = 
+        cal_Func(self.project_manager.current_project_file)
+    #     result = self.calculate_error()
+    #     logging.info("计算结果：%s", result)
 
-    def calculate_error(self):
-        logging.info("开始计算误差...")
-        error_result = "误差结果"  # 这里替换为实际的计算逻辑
-        logging.info("误差计算完成：%s", error_result)
-        return error_result
+    # def calculate_error(self):
+    #     logging.info("开始计算误差...")
+    #     error_result = "误差结果"  # 这里替换为实际的计算逻辑
+    #     logging.info("误差计算完成：%s")
+    #     return error_result
 
 
 
