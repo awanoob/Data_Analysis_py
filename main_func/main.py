@@ -3,16 +3,14 @@ import os
 import logging
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtCore import Qt
-from ui_mainwindow import Ui_MainWindow
-from ui_selectreport import Ui_SelectReport
-from utils.logger import setup_logging
-from utils.updater import UpdateManager
-from utils.project_manager import ProjectManager
-from widgets.table_manager import TableManager
+from main_func.window.ui_mainwindow import Ui_MainWindow
+from main_func.window.ui_selectreport import Ui_SelectReport
+from main_func.window.utils.logger import setup_logging
+from main_func.window.utils.updater import UpdateManager
+from main_func.window.utils.project_manager import ProjectManager
+from main_func.window.widgets.table_manager import TableManager
 from os import path
-# 这里相当于把相对路径 .. 添加到pythonpath中
-sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-from cal_and_output.cal_function import cal_Func
+from main_func.cal_and_output.cal_function import cal_Func
 
 
 class SelectReportDialog(QtWidgets.QDialog):
@@ -53,7 +51,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def load_stylesheet(self):
         # 从外部文件加载样式表
         try:
-            with open('qt6_style.qss', 'r', encoding='utf-8') as f:
+            with open('window/qt6_style.qss', 'r', encoding='utf-8') as f:
                 self.setStyleSheet(f.read())
         except Exception as e:
             logging.error(f"加载样式表失败: {e}")
