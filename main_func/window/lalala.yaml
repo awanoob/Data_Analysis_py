@@ -2,25 +2,9 @@ cal_alt_syserr: 2
 cal_att_syserr: 2
 cal_pos_syserr: 2
 cvrt2navplot: true
-data:
-- data_format: navplot
-  data_frq: 1Hz
-  data_path: C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/window/设备轨迹.navplot
-  dev_name: '830'
-  is_bchmk: true
-- data_format: navplot
-  data_frq: 1Hz
-  data_path: C:/Users/wyx/OneDrive/python/Data_analysis_py/main_func/window/真值轨迹.navplot
-  dev_name: '230'
-  is_bchmk: false
+data: []
 era_auto_all: false
-era_list:
-- era_end: '231131'
-  era_start: '22131'
-  scene: ada
-- era_end: '12341245125'
-  era_start: '213125'
-  scene: abba
+era_list: []
 out2car_coor: false
 output_cep: false
 output_fig: true

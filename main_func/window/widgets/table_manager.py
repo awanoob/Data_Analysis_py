@@ -66,6 +66,7 @@ class TableManager:
 
         if data:
             table1.setItem(row_position, 0, QTableWidgetItem(data.get('data_path', '')))
+            table1.setItem(row_position, 1, QTableWidgetItem(data.get('dev_name', '')))
 
         # 创建格式下拉框
         format_combo = QComboBox()

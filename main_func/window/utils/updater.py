@@ -114,7 +114,11 @@ class UpdateManager:
         self.progress_dialog.setValue(value)
 
     def update_finished(self, save_path):
-        self.progress_dialog.close()
+        try:
+            self.progress_dialog.close()
+        finally:
+            self.progress_dialog.deleteLater()
+            self.progress_dialog = None
         reply = QMessageBox.question(self.main_window, "更新完成", "新版本已下载完成，是否立即安装？\n(将重启应用)",
                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:

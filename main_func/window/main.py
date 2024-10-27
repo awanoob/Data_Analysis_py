@@ -43,8 +43,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # 检查更新
         self.update_manager.check_for_updates()
 
-        self.current_project_file = None
-        self.unsaved_changes = None
+        self.current_project_file = None # 当前打开的项目文件
+        self.unsaved_changes = False # 项目是否有未保存的更改
 
     def load_stylesheet(self):
         # 从外部文件加载样式表
