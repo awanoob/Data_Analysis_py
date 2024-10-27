@@ -98,25 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
         logging.info("误差计算完成：%s", error_result)
         return error_result
 
-    def update_ui_from_project_config(self, project_config):
-        """根据项目配置更新UI"""
-        # 清空表格
-        self.ui.tableWidget.setRowCount(0)
-        self.ui.tableWidget_2.setRowCount(0)
 
-        # 更新数据表格
-        for data in project_config['data']:
-            row_position = self.ui.tableWidget.rowCount()
-            self.ui.tableWidget.insertRow(row_position)
-            self.table_manager.create_table_controls(row_position, data)
-
-        # 更新时间段表格
-        for era in project_config['era_list']:
-            row_position = self.ui.tableWidget_2.rowCount()
-            self.ui.tableWidget_2.insertRow(row_position)
-            self.ui.tableWidget_2.setItem(row_position, 0, QtWidgets.QTableWidgetItem(era['scene']))
-            self.ui.tableWidget_2.setItem(row_position, 1, QtWidgets.QTableWidgetItem(era['era_start']))
-            self.ui.tableWidget_2.setItem(row_position, 2, QtWidgets.QTableWidgetItem(era['era_end']))
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

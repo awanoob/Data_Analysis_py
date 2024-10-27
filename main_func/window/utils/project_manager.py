@@ -1,5 +1,6 @@
 import os
 import yaml
+from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 from main_func.window.config.settings import DEFAULT_PROJECT_CONFIG
 
@@ -40,7 +41,7 @@ class ProjectManager:
                 self.last_directory = os.path.dirname(file_path)
 
                 QMessageBox.information(self.main_window, "成功", "项目创建成功！")
-                self.main_window.update_ui_from_project_config(self.project_config)
+                self.update_ui_from_project_config(self.project_config)
             except Exception as e:
                 QMessageBox.critical(self.main_window, "错误", f"创建项目文件失败：{str(e)}")
 
@@ -68,7 +69,7 @@ class ProjectManager:
                 self.main_window.ui.centralwidget.show()
                 self.unsaved_changes = False
                 self.last_directory = os.path.dirname(file_path)
-                self.main_window.update_ui_from_project_config(self.project_config)
+                self.update_ui_from_project_config(self.project_config)
             except Exception as e:
                 QMessageBox.critical(self.main_window, "错误", f"打开项目文件失败：{str(e)}")
 
@@ -97,3 +98,23 @@ class ProjectManager:
 
     def check_unsaved_changes(self):
         return self.unsaved_changes
+
+    def update_ui_from_project_config(self, project_config):
+        """根据项目配置更新UI"""
+        # 清空表格
+        self.main_window.ui.tableWidget.setRowCount(0)
+        self.main_window.ui.tableWidget_2.setRowCount(0)
+
+        # 更新数据表格
+        for data in project_config['data']:
+            row_position = self.main_window.ui.tableWidget.rowCount()
+            self.main_window.ui.tableWidget.insertRow(row_position)
+            self.main_window.table_manager.create_table_controls(row_position, data)
+
+        # 更新时间段表格
+        for era in project_config['era_list']:
+            row_position = self.main_window.ui.tableWidget_2.rowCount()
+            self.main_window.ui.tableWidget_2.insertRow(row_position)
+            self.main_window.ui.tableWidget_2.setItem(row_position, 0, QtWidgets.QTableWidgetItem(era['scene']))
+            self.main_window.ui.tableWidget_2.setItem(row_position, 1, QtWidgets.QTableWidgetItem(era['era_start']))
+            self.main_window.ui.tableWidget_2.setItem(row_position, 2, QtWidgets.QTableWidgetItem(era['era_end']))

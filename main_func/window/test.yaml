@@ -7,52 +7,52 @@ data:
   data_frq: '5Hz'
   data_path: '0'
   dev_name: '0'
-  is_bchmk: 'true'
+  is_bchmk: True
 - data_format: '1'
   data_frq: '1'
   data_path: '1'
   dev_name: '1'
-  is_bchmk: '1'
+  is_bchmk: False
 - data_format: '2'
   data_frq: '2'
   data_path: '2'
   dev_name: '2'
-  is_bchmk: '2'
+  is_bchmk: False
 - data_format: '3'
   data_frq: '3'
   data_path: '3'
   dev_name: '3'
-  is_bchmk: '3'
+  is_bchmk: False
 - data_format: '4'
   data_frq: '4'
   data_path: '4'
   dev_name: '4'
-  is_bchmk: '4'
+  is_bchmk: False
 - data_format: '5'
   data_frq: '5'
   data_path: '5'
   dev_name: '5'
-  is_bchmk: '5'
+  is_bchmk: False
 - data_format: '6'
   data_frq: '6'
   data_path: '6'
   dev_name: '6'
-  is_bchmk: '6'
+  is_bchmk: False
 - data_format: '7'
   data_frq: '7'
   data_path: '7'
   dev_name: '7'
-  is_bchmk: '7'
+  is_bchmk: False
 - data_format: '8'
   data_frq: '8'
   data_path: '8'
   dev_name: '8'
-  is_bchmk: '8'
+  is_bchmk: False
 - data_format: '9'
   data_frq: '9'
   data_path: '9'
   dev_name: '9'
-  is_bchmk: '9'
+  is_bchmk: False
 era_auto_all: false
 era_list: []
 out2car_coor: false
