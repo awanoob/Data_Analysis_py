@@ -76,8 +76,7 @@ class MapGenerator:
             location=center,
             zoom_start=zoom,
             tiles=None,
-            # 关键：添加crs参数使用WGS84坐标系统
-            crs='EPSG:4326'  # WGS84经纬度坐标系
+            crs = 'EPSG4326'
         )
 
         # 使用img_c（影像底图，经纬度投影）
@@ -90,8 +89,9 @@ class MapGenerator:
 
         folium.TileLayer(
             tiles=img_url,
-            attr='天地图影像图',
-            name='天地图影像图'
+            attr='天地图',
+            name='天地图影像图',
+            zoomOffset = 1
         ).add_to(m)
 
         # # 添加标注图层（cia_c是经纬度投影的标注）
@@ -229,7 +229,7 @@ class MapGenerator:
             for is_zoomed, output_path in [(False, output_path_full), (True, output_path_zoomed)]:
                 m = self._create_map(
                     random_point if is_zoomed else center,
-                    18 if is_zoomed else full_zoom  # 使用计算得到的缩放级别
+                    17 if is_zoomed else full_zoom  # 使用计算得到的缩放级别
                 )
                 self._add_lines_to_map(m, lines_data)
                 if not is_zoomed:
