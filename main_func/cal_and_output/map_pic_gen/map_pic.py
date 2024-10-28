@@ -36,14 +36,18 @@ class MapGenerator:
             options.add_argument('--disable-infobars')
             options.add_argument('--ignore-certificate-errors')
 
-            if self.proxy_manager.has_proxy:
-                proxy_url = self.proxy_manager.get_proxy_url()
-                if proxy_url:
-                    logging.info(f"使用代理：{proxy_url}")
-                    options.add_argument(f'--proxy-server={proxy_url}')
-                    if 'bypass' in self.proxy_manager.proxy_settings:
-                        bypass_list = ','.join(self.proxy_manager.proxy_settings['bypass'])
-                        options.add_argument(f'--proxy-bypass-list={bypass_list}')
+            # 修改代理部分的判断逻辑
+            try:
+                if self.proxy_manager.has_proxy:
+                    proxy_url = self.proxy_manager.get_proxy_url()
+                    if proxy_url:
+                        logging.info(f"使用代理：{proxy_url}")
+                        options.add_argument(f'--proxy-server={proxy_url}')
+                        if 'bypass' in self.proxy_manager.proxy_settings:
+                            bypass_list = ','.join(self.proxy_manager.proxy_settings['bypass'])
+                            options.add_argument(f'--proxy-bypass-list={bypass_list}')
+            except Exception as proxy_error:
+                logging.warning(f"代理设置失败，将不使用代理: {str(proxy_error)}")
 
             self._driver = webdriver.Chrome(
                 service=Service(ChromeDriverManager().install()),
@@ -68,24 +72,50 @@ class MapGenerator:
 
     def _create_map(self, center: List[float], zoom: int) -> folium.Map:
         """创建基础地图"""
-        m = folium.Map(location=center, zoom_start=zoom, tiles=None)
-        tianditu_url = (
-            "http://t7.tianditu.gov.cn/img_w/wmts?"
+        m = folium.Map(
+            location=center,
+            zoom_start=zoom,
+            tiles=None,
+            # 关键：添加crs参数使用WGS84坐标系统
+            crs='EPSG:4326'  # WGS84经纬度坐标系
+        )
+
+        # 使用img_c（影像底图，经纬度投影）
+        img_url = (
+            "http://t7.tianditu.gov.cn/img_c/wmts?"
             "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&"
-            "LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&"
+            "LAYER=img&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&"
             f"TILEMATRIX={{z}}&TILEROW={{y}}&TILECOL={{x}}&tk={self.api_key}"
         )
+
         folium.TileLayer(
-            tiles=tianditu_url,
-            attr='天地图',
+            tiles=img_url,
+            attr='天地图影像图',
             name='天地图影像图'
         ).add_to(m)
+
+        # # 添加标注图层（cia_c是经纬度投影的标注）
+        # anno_url = (
+        #     "http://t{s}.tianditu.gov.cn/cia_c/wmts?"
+        #     "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&"
+        #     "LAYER=cia&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&"
+        #     f"TILEMATRIX={{z}}&TILEROW={{y}}&TILECOL={{x}}&tk={self.api_key}"
+        # )
+        #
+        # folium.TileLayer(
+        #     tiles=anno_url,
+        #     attr='天地图标注',
+        #     name='天地图标注',
+        #     overlay=True
+        # ).add_to(m)
+
         return m
 
     def _add_lines_to_map(self, map_obj: folium.Map, lines_data: List[List[Tuple[float, float]]]):
         """向地图添加多条线"""
         for i, line in enumerate(lines_data):
             color = self.colors[i % len(self.colors)]
+            # 不需要转换坐标，直接使用经纬度
             folium.PolyLine(
                 locations=line,
                 weight=2,
@@ -149,6 +179,35 @@ class MapGenerator:
                 except Exception as e:
                     logging.warning(f"删除临时文件失败: {str(e)}")
 
+    def _calculate_zoom_level(self, bounds: List[List[float]]) -> int:
+        """
+        根据边界范围计算合适的缩放级别
+        bounds: [[min_lat, min_lon], [max_lat, max_lon]]
+        """
+        lat_diff = bounds[1][0] - bounds[0][0]  # 纬度差
+        lon_diff = bounds[1][1] - bounds[0][1]  # 经度差
+
+        # 计算最大跨度（度）
+        max_diff = max(lat_diff, lon_diff)
+
+        # 缩放级别映射表（近似值）：
+        # 跨度 -> 缩放级别
+        zoom_mapping = {
+            0.0001: 20,  # ~10m
+            0.001: 17,  # ~100m
+            0.01: 14,  # ~1km
+            0.1: 11,  # ~10km
+            1: 8,  # ~100km
+            10: 5,  # ~1000km
+        }
+
+        # 找到最接近的缩放级别
+        for span, zoom in sorted(zoom_mapping.items()):
+            if max_diff <= span:
+                return zoom
+
+        return 4  # 默认最小缩放级别
+
     def create_maps(self, lines_data: List[List[Tuple[float, float]]],
                     output_path_full: str, output_path_zoomed: str):
         """创建地图（全局视图和局部视图）"""
@@ -159,13 +218,18 @@ class MapGenerator:
 
             center = [np.mean(all_lats), np.mean(all_lons)]
             bounds = [[min(all_lats), min(all_lons)], [max(all_lats), max(all_lons)]]
+
+            # 为全局视图计算合适的缩放级别
+            full_zoom = self._calculate_zoom_level(bounds)
+
+            # 为局部视图选择一个随机点
             random_point = all_coords[np.random.randint(0, len(all_coords))]
 
             # 创建两个地图
             for is_zoomed, output_path in [(False, output_path_full), (True, output_path_zoomed)]:
                 m = self._create_map(
                     random_point if is_zoomed else center,
-                    18 if is_zoomed else 12
+                    18 if is_zoomed else full_zoom  # 使用计算得到的缩放级别
                 )
                 self._add_lines_to_map(m, lines_data)
                 if not is_zoomed:
@@ -178,7 +242,7 @@ class MapGenerator:
             raise
 
 
-def map_gen(datapaths: Union[str, List[str]]) -> None:
+def map_generator(datapaths: Union[str, List[str]], output_path_full, output_path_zoomed) -> None:
     """生成地图的主函数"""
     try:
         if isinstance(datapaths, str):
@@ -198,11 +262,11 @@ def map_gen(datapaths: Union[str, List[str]]) -> None:
         if not lines_data:
             raise ValueError("没有成功读取任何轨迹数据")
 
-        map_generator = MapGenerator()
-        map_generator.create_maps(
+        map_generate = MapGenerator()
+        map_generate.create_maps(
             lines_data,
-            "output_map_full.png",
-            "output_map_zoomed.png"
+            output_path_full,
+            output_path_zoomed
         )
 
     except Exception as e:

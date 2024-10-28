@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from docx import Document
@@ -13,7 +14,7 @@ import pandas as pd
 import os
 import glob
 import sys
-
+from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
 
 # 打开模板文档
 doc = Document(r'C:\Users\wyx\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
@@ -47,18 +48,43 @@ def get_png_files(folder_path):
     return png_files
 
 
-def get_xlsx_datas(folder_path):
-    """获取excel文件"""
-    # 获取该文件夹下的所有文件夹的名称
+
+
+def get_csv_datas(folder_path, multi_folder_path):
+    """获取csv误差文件并生成地图"""
+    # 获取该文件夹下的所有子文件夹的名称
     folder_paths = os.listdir(folder_path)
-    filepaths = []
-    for i in range(len(folder_paths)):
-        filepaths.append(folder_path + '\\' + folder_paths[i] + '\\' + folder_paths[i] + '_误差统计表.csv')
+    err_paths = []
+    scene_paths = {}
+
+    # 存储每个场景对应的输出文件夹路径
+    scene_output_paths = {}
+
+    for folder in folder_paths:
+        # 拼接误差统计表的路径
+        err_file = os.path.join(folder_path, folder, f"{folder}_误差统计表.csv")
+        err_paths.append(err_file)
+
+        # 获取文件夹下子文件夹的名称（不包含'.'的文件夹）
+        scene_folder_paths = [name for name in os.listdir(os.path.join(folder_path, folder)) if '.' not in name]
+
+        # 记录每个场景的输出路径
+        for scene_folder in scene_folder_paths:
+            scene_output_path = os.path.join(folder_path, scene_folder)
+            scene_output_paths[scene_folder] = scene_output_path
+
+            # 初始化 scene_paths 中的 scene_folder 列表
+            if scene_folder not in scene_paths:
+                scene_paths[scene_folder] = []
+
+            # 拼接 test.navplot 文件路径并添加到 scene_paths 字典的对应列表中
+            navplot_file = os.path.join(folder_path, folder, scene_folder, f"{scene_folder}_test.navplot")
+            scene_paths[scene_folder].append(navplot_file)
 
     # 使用字典存储每个文件夹名称与其对应的DataFrame
     xlsx_datas = {}
     i = 0
-    for filepath in filepaths:
+    for filepath in err_paths:
         folder_name = os.path.basename(os.path.dirname(filepath))
         xlsx_data = pd.read_csv(filepath)
 
@@ -70,6 +96,19 @@ def get_xlsx_datas(folder_path):
         # 读取距离
         xlsx_datas[folder_name]['distance'] = xlsx_data.iloc[i, -1]
         i += 6
+
+    # 为每个场景生成地图
+    for scene_name, navplot_files in scene_paths.items():
+        try:
+            output_path_full = os.path.join(multi_folder_path, scene_name, f"{scene_name}_map_full.png")
+            output_path_zoomed = os.path.join(multi_folder_path, scene_name, f"{scene_name}_map_zoomed.png")
+
+            # 调用map_gen生成地图
+            map_generator(navplot_files, output_path_full, output_path_zoomed)
+
+        except Exception as e:
+            logging.error(f"生成{scene_name}场景地图失败: {str(e)}")
+            continue
 
     return xlsx_datas
 
@@ -232,20 +271,28 @@ def write_chapter1():
     doc.add_paragraph('')
 
 
-def write_chapter2(pic_filepath, xlsx_filepath):
+def write_chapter2(pic_filepath, dev_filepath):
     """第二章的内容"""
     doc.add_paragraph('结果展示与总结', style='Heading 1')
     # 获取图片文件
     pic_files = get_png_files(pic_filepath)
-    # 获取excel文件
-    xlsx_datas = get_xlsx_datas(xlsx_filepath)
+    # 获取误差文件
+    xlsx_datas = get_csv_datas(dev_filepath, pic_filepath)
+    # 获取设备文件
+    # navplot = get_nav_file(dev_filepath)
     product_names = list(xlsx_datas.keys())
     values = [df.drop(df.index[5::6]) for df in xlsx_datas.values()]
     count = 1
     for title, pics in pic_files.items():
         doc.add_paragraph(title, style='Heading 2')
-        doc.add_paragraph('（1）轨迹对比图')
-        doc.add_paragraph('（2）误差序列图')
+        doc.add_paragraph('（1）轨迹对比图', style='PictureName')
+        doc.add_paragraph('', style='Picture')
+        doc.add_paragraph(f'图2.{count} 场景轨迹图', style='PictureName')
+        count += 1
+        doc.add_paragraph('', style='Picture')
+        doc.add_paragraph(f'图2.{count} 局部对比图', style='PictureName')
+        count += 1
+        doc.add_paragraph('（2）误差序列图', style='PictureName')
         for pic in pics:
             start = pic.find('(') + 1
             end = pic.find(')')
@@ -305,7 +352,7 @@ def write_chapter3():
 
 def report_gen_func(input_cfg):
     pic_folder_path = input_cfg['multi_dev_err_path']
-    xlsx_folder_path = input_cfg['path_proj_dev']
+    dev_folder_path = input_cfg['path_proj_dev']
     # 读取excel文件
 
     # 设置页脚信息
@@ -320,7 +367,7 @@ def report_gen_func(input_cfg):
     write_chapter1()
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
     # 第二章
-    write_chapter2(pic_folder_path, xlsx_folder_path)
+    write_chapter2(pic_folder_path, dev_folder_path)
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
     # 第三章
     write_chapter3()

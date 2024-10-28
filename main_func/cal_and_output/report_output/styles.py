@@ -108,7 +108,7 @@ def create_custom_styles(doc):
     pic_name_font = pic_name_style.font
     pic_name_font.name = 'Times New Roman'
     title_font._element.rPr.rFonts.set(qn('w:eastAsia'), '宋体')
-    pic_name_font.size = Pt(10)
+    pic_name_font.size = Pt(10.5)
     pic_name_style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     pic_name_style.paragraph_format.line_spacing = 1
 
