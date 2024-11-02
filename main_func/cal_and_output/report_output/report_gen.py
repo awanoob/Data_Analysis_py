@@ -86,13 +86,13 @@ def get_dev_datas(folder_path, multi_folder_path):
         xlsx_data = pd.read_csv(filepath)
 
         xlsx_datas[folder_name] = {}
-        # 读取场景、指标和误差
-        xlsx_datas[folder_name]['data'] = xlsx_data.iloc[:, :-2]
-        # 读取固定率
-        xlsx_datas[folder_name]['fix_ratio'] = xlsx_data.iloc[i, -2]
-        # 读取距离
-        xlsx_datas[folder_name]['distance'] = xlsx_data.iloc[i, -1]
-        i += 6
+
+        for i in range(0, len(xlsx_data), 6):
+            scene_name = xlsx_data.iloc[i, 0]
+            xlsx_datas[folder_name][scene_name] = {}
+            xlsx_datas[folder_name][scene_name]['data'] = xlsx_data.iloc[i:i + 5, 2:]
+            xlsx_datas[folder_name][scene_name]['fix_ratio'] = float(xlsx_data.iloc[i, -2])
+            xlsx_datas[folder_name][scene_name]['distance'] = float(xlsx_data.iloc[i, -1])
 
     # 为每个场景生成地图
     map_paths = {}
@@ -237,6 +237,26 @@ def apply_table_style(table, border_size="2.25pt"):
             cell.width = Cm(column_widths.get(idx, 1))
 
 
+def fill_table_data(table, title, product_names, xlsx_datas):
+    """填充表格数据"""
+    indicators = ['1σ', '2σ', '3σ', 'RMS', 'MAX']
+
+    for i, product_name in enumerate(product_names):
+        device_data = xlsx_datas[product_name][title]['data']
+
+        for j in range(5):
+            # 填充指标列
+            table.cell(5 * i + j + 1, 2).text = indicators[j]
+            table.cell(5 * i + j + 1, 2).paragraphs[0].style = doc.styles['TableParagraph']
+
+            # 填充数据列 - 修改这里,只取前10列数据(不包括固定率和总里程)
+            for k in range(10):  # 修改这里,原来是range(12)
+                cell_value = device_data.iloc[j, k]  # 修改这里,去掉+2
+                formatted_value = f"{cell_value:.4f}" if isinstance(cell_value, (int, float)) else str(cell_value)
+                table.cell(5 * i + j + 1, k + 3).text = formatted_value
+                table.cell(5 * i + j + 1, k + 3).paragraphs[0].style = doc.styles['TableParagraph']
+
+
 def write_cover():
     """封面"""
     # 拿到第一个节的第一个表格
@@ -282,29 +302,61 @@ def write_chapter2(pic_filepath, dev_filepath):
     for title, pics in pic_files.items():
         doc.add_paragraph(title, style='Heading 2')
         doc.add_paragraph('（1）轨迹对比图')
-        doc.add_paragraph('', style='Picture')
         paragraph = doc.add_paragraph(style='Picture')
         run = paragraph.add_run()
         run.add_picture(map_paths[title][0], width=Cm(15))
         doc.add_paragraph(f'图2.{count} 场景轨迹图', style='PictureName')
         count += 1
+
+        # 处理误差序列图
+        doc.add_paragraph('（2）误差序列图')
         paragraph = doc.add_paragraph(style='Picture')
         run = paragraph.add_run()
         run.add_picture(map_paths[title][1], width=Cm(15))
         doc.add_paragraph(f'图2.{count} 局部对比图', style='PictureName')
         count += 1
-        doc.add_paragraph('（2）误差序列图')
+        # 定义图片类型和顺序
+        pic_types = {
+            '_xy.png': {'order': 1, 'description': '位置误差-1'},
+            '_pos_alt.png': {'order': 2, 'description': '位置误差-2'},
+            '_vel.png': {'order': 3, 'description': '速度误差'},
+            '_att.png': {'order': 4, 'description': '姿态误差'}
+        }
+
+        # 收集和排序误差图片
+        error_pics = []
         for pic in pics:
-            if 'map' not in pic:
-                start = pic.find('(') + 1
-                end = pic.find(')')
+            if 'map' not in pic:  # 排除地图图片
+                # 获取图片的类型后缀
+                pic_suffix = None
+                for suffix in pic_types.keys():
+                    if pic.endswith(suffix):
+                        pic_suffix = suffix
+                        break
+
+                if pic_suffix:
+                    error_pics.append({
+                        'path': pic,
+                        'order': pic_types[pic_suffix]['order'],
+                        'description': pic_types[pic_suffix]['description']
+                    })
+
+        # 按预定顺序排序
+        error_pics.sort(key=lambda x: x['order'])
+
+        # 添加排序后的图片
+        for pic_info in error_pics:
+            try:
                 paragraph = doc.add_paragraph(style='Picture')
                 run = paragraph.add_run()
-                run.add_picture(pic, width=Cm(15))
-                # 添加图名
-                doc.add_paragraph(f'图2.{count} {pic[start:end]}', style='PictureName')
+                run.add_picture(pic_info['path'], width=Cm(15))
+                doc.add_paragraph(f'图2.{count} {pic_info["description"]}', style='PictureName')
                 count += 1
+            except Exception as e:
+                logging.warning(f"添加图片到文档时出错: {str(e)}")
+                continue
 
+        # 处理产品误差统计表格
         doc.add_paragraph('（3）产品误差统计')
         # 添加表格
         rows = len(xlsx_datas) * 5 + 1
@@ -313,9 +365,8 @@ def write_chapter2(pic_filepath, dev_filepath):
         apply_table_style(table)
 
         # 设置表头
-        # 获取第一个设备的数据列名作为表头
-        first_device_data = xlsx_datas[product_names[0]]['data']
-        table_head = ['场景', '产品'] + list(first_device_data.columns[1:12])
+        first_device_data = xlsx_datas[product_names[0]][title]['data']
+        table_head = ['场景', '产品', '参数'] + list(first_device_data.columns[0:10])
 
         # 合并第一列（除表头外的所有单元格）
         first_col_cells = table.column_cells(0)[1:]
@@ -337,24 +388,15 @@ def write_chapter2(pic_filepath, dev_filepath):
             table.cell(0, i).paragraphs[0].style = doc.styles['TableParagraph']
 
         # 填充数据
-        for i, product_name in enumerate(product_names):
-            device_data = xlsx_datas[product_name]['data']
-            for q in range(len(device_data.index) // 5):
-                if device_data.iloc[q * 5, 0] == title:  # 检查场景名称
-                    for j in range(5):
-                        for k in range(11):
-                            cell_value = str(device_data.iloc[j + q * 5, k + 1])
-                            table.cell(5 * i + j + 1, k + 2).text = cell_value
-                            table.cell(5 * i + j + 1, k + 2).paragraphs[0].style = doc.styles['TableParagraph']
+        fill_table_data(table, title, product_names, xlsx_datas)
 
         # 添加结论段落
-        doc.add_paragraph(f'统计结果表明，在{title}道路场景下：')
+        doc.add_paragraph(f'统计结果表明，在{title}道路场景下，全程：{xlsx_datas[product_names[0]][title]["distance"]}米。')
 
         # 添加设备固定率和距离信息
         for product_name in product_names:
-            fix_ratio = xlsx_datas[product_name]['fix_ratio']
-            distance = xlsx_datas[product_name]['distance']
-            doc.add_paragraph(f'{product_name}设备固定率为{fix_ratio:.2f}%，总计测试距离{distance:.2f}km。')
+            fix_ratio = xlsx_datas[product_name][title]['fix_ratio']
+            doc.add_paragraph(f'{product_name}设备固定率为{fix_ratio:.2f}%。')
 
         doc.add_paragraph('')
 
@@ -389,7 +431,7 @@ def report_gen_func(input_cfg):
     # 第三章
     write_chapter3()
     # 保存文档
-    doc.save(r'C:\Users\admin\Desktop\实时总\测试报告.docx')
+    doc.save(r'C:\Users\admin\Desktop\测试报告.docx')
 
 
 if __name__ == '__main__':
