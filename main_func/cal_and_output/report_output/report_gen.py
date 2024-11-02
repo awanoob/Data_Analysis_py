@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-
 from docx import Document
 from docx.enum.section import WD_SECTION, WD_SECTION_START
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
@@ -8,16 +7,16 @@ from docx.enum.text import WD_BREAK, WD_PARAGRAPH_ALIGNMENT, WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.shared import Cm, Pt
 from docx.oxml.ns import qn
-
-import main_func.cal_and_output.report_output.styles as styles
 import pandas as pd
 import os
 import glob
 import sys
 from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
+import main_func.cal_and_output.report_output.styles as styles
 
 # 打开模板文档
-doc = Document(r'C:\Users\wyx\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
+doc = Document(
+    r'C:\Users\admin\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
 
 default_section = doc.sections[0]
 
@@ -48,9 +47,7 @@ def get_png_files(folder_path):
     return png_files
 
 
-
-
-def get_csv_datas(folder_path, multi_folder_path):
+def get_dev_datas(folder_path, multi_folder_path):
     """获取csv误差文件并生成地图"""
     # 获取该文件夹下的所有子文件夹的名称
     folder_paths = os.listdir(folder_path)
@@ -98,6 +95,7 @@ def get_csv_datas(folder_path, multi_folder_path):
         i += 6
 
     # 为每个场景生成地图
+    map_paths = {}
     for scene_name, navplot_files in scene_paths.items():
         try:
             output_path_full = os.path.join(multi_folder_path, scene_name, f"{scene_name}_map_full.png")
@@ -106,11 +104,13 @@ def get_csv_datas(folder_path, multi_folder_path):
             # 调用map_gen生成地图
             map_generator(navplot_files, output_path_full, output_path_zoomed)
 
+            map_paths[scene_name] = (output_path_full, output_path_zoomed)
+
         except Exception as e:
             logging.error(f"生成{scene_name}场景地图失败: {str(e)}")
             continue
 
-    return xlsx_datas
+    return xlsx_datas, map_paths
 
 
 def header_info():
@@ -197,7 +197,7 @@ def set_cell_margins(cell, **kwargs):
     for m in ['top', 'start', 'bottom', 'end', 'left', 'right']:
         if m in kwargs:
             node = OxmlElement('w:{}'.format(m))
-            node.set(qn('w:w'), str(kwargs.get(m)*567))  # 1cm = 567 Twips
+            node.set(qn('w:w'), str(kwargs.get(m) * 567))  # 1cm = 567 Twips
             node.set(qn('w:type'), 'dxa')
             tcMar.append(node)
     tcPr.append(tcMar)
@@ -237,8 +237,6 @@ def apply_table_style(table, border_size="2.25pt"):
             cell.width = Cm(column_widths.get(idx, 1))
 
 
-
-
 def write_cover():
     """封面"""
     # 拿到第一个节的第一个表格
@@ -276,32 +274,36 @@ def write_chapter2(pic_filepath, dev_filepath):
     doc.add_paragraph('结果展示与总结', style='Heading 1')
     # 获取图片文件
     pic_files = get_png_files(pic_filepath)
-    # 获取误差文件
-    xlsx_datas = get_csv_datas(dev_filepath, pic_filepath)
-    # 获取设备文件
-    # navplot = get_nav_file(dev_filepath)
+    # 获取误差文件和地图文件
+    xlsx_datas, map_paths = get_dev_datas(dev_filepath, pic_filepath)
     product_names = list(xlsx_datas.keys())
-    values = [df.drop(df.index[5::6]) for df in xlsx_datas.values()]
+
     count = 1
     for title, pics in pic_files.items():
         doc.add_paragraph(title, style='Heading 2')
-        doc.add_paragraph('（1）轨迹对比图', style='PictureName')
+        doc.add_paragraph('（1）轨迹对比图')
         doc.add_paragraph('', style='Picture')
+        paragraph = doc.add_paragraph(style='Picture')
+        run = paragraph.add_run()
+        run.add_picture(map_paths[title][0], width=Cm(15))
         doc.add_paragraph(f'图2.{count} 场景轨迹图', style='PictureName')
         count += 1
-        doc.add_paragraph('', style='Picture')
+        paragraph = doc.add_paragraph(style='Picture')
+        run = paragraph.add_run()
+        run.add_picture(map_paths[title][1], width=Cm(15))
         doc.add_paragraph(f'图2.{count} 局部对比图', style='PictureName')
         count += 1
-        doc.add_paragraph('（2）误差序列图', style='PictureName')
+        doc.add_paragraph('（2）误差序列图')
         for pic in pics:
-            start = pic.find('(') + 1
-            end = pic.find(')')
-            paragraph = doc.add_paragraph(style='Picture')
-            run = paragraph.add_run()
-            run.add_picture(pic, width=Cm(15))
-            # 添加图名
-            doc.add_paragraph(f'图2.{count} {pic[start:end]}', style='PictureName')
-            count += 1
+            if 'map' not in pic:
+                start = pic.find('(') + 1
+                end = pic.find(')')
+                paragraph = doc.add_paragraph(style='Picture')
+                run = paragraph.add_run()
+                run.add_picture(pic, width=Cm(15))
+                # 添加图名
+                doc.add_paragraph(f'图2.{count} {pic[start:end]}', style='PictureName')
+                count += 1
 
         doc.add_paragraph('（3）产品误差统计')
         # 添加表格
@@ -309,21 +311,23 @@ def write_chapter2(pic_filepath, dev_filepath):
         cols = 13
         table = doc.add_table(rows=rows, cols=cols)
         apply_table_style(table)
-        # 设置表头
-        table_head = ['场景', '产品'] + [values[0].columns[i] for i in range(1, 12)]
 
-        # 合并第一列（除表头外的10个单元格）
-        first_col_cells = table.column_cells(0)[1:]  # 获取第一列除表头外的单元格
-        merged_first_col = first_col_cells[0].merge(first_col_cells[-1])  # 合并第一个和最后一个单元格
-        merged_first_col.text = title  # 设置合并后单元格的文本
+        # 设置表头
+        # 获取第一个设备的数据列名作为表头
+        first_device_data = xlsx_datas[product_names[0]]['data']
+        table_head = ['场景', '产品'] + list(first_device_data.columns[1:12])
+
+        # 合并第一列（除表头外的所有单元格）
+        first_col_cells = table.column_cells(0)[1:]
+        merged_first_col = first_col_cells[0].merge(first_col_cells[-1])
+        merged_first_col.text = title
         merged_first_col.paragraphs[0].style = doc.styles['TableParagraph']
 
-        # 合并第二列（除表头外每5个单元格合并一次，循环进行）
-        second_col_cells = table.column_cells(1)[1:]  # 获取第二列除表头外的单元格
+        # 合并第二列（除表头外每5个单元格合并一次）
+        second_col_cells = table.column_cells(1)[1:]
         for i in range(0, len(second_col_cells), 5):
             cells_to_merge = second_col_cells[i:i + 5]
-            merged_cell = cells_to_merge[0].merge(cells_to_merge[-1])  # 合并每5个单元格
-            # merged_cell.text = f'Merged group {i // 5 + 1}'  # 设置合并后单元格的文本
+            merged_cell = cells_to_merge[0].merge(cells_to_merge[-1])
             merged_cell.text = product_names[i // 5]
             merged_cell.paragraphs[0].style = doc.styles['TableParagraph']
 
@@ -331,17 +335,29 @@ def write_chapter2(pic_filepath, dev_filepath):
         for i in range(cols):
             table.cell(0, i).text = table_head[i]
             table.cell(0, i).paragraphs[0].style = doc.styles['TableParagraph']
+
         # 填充数据
-        for i in range(len(xlsx_datas)):
-            for q in range(len(values[0].index) // 5):
-                if values[i].iloc[q * 5, 0] == title:
+        for i, product_name in enumerate(product_names):
+            device_data = xlsx_datas[product_name]['data']
+            for q in range(len(device_data.index) // 5):
+                if device_data.iloc[q * 5, 0] == title:  # 检查场景名称
                     for j in range(5):
-                        for k in range(0, 11):
-                            table.cell(5 * i + j + 1, k + 2).text = str(values[i].iloc[j + q * 5, k + 1])
+                        for k in range(11):
+                            cell_value = str(device_data.iloc[j + q * 5, k + 1])
+                            table.cell(5 * i + j + 1, k + 2).text = cell_value
                             table.cell(5 * i + j + 1, k + 2).paragraphs[0].style = doc.styles['TableParagraph']
 
+        # 添加结论段落
         doc.add_paragraph(f'统计结果表明，在{title}道路场景下：')
+
+        # 添加设备固定率和距离信息
+        for product_name in product_names:
+            fix_ratio = xlsx_datas[product_name]['fix_ratio']
+            distance = xlsx_datas[product_name]['distance']
+            doc.add_paragraph(f'{product_name}设备固定率为{fix_ratio:.2f}%，总计测试距离{distance:.2f}km。')
+
         doc.add_paragraph('')
+
 
 def write_chapter3():
     """第三章的内容"""
@@ -349,6 +365,7 @@ def write_chapter3():
     doc.add_paragraph('水平位置误差RMS汇总', style='Heading 2')
     doc.add_paragraph('')
     doc.add_paragraph('航向角误差RMS汇总', style='Heading 2')
+
 
 def report_gen_func(input_cfg):
     pic_folder_path = input_cfg['multi_dev_err_path']
@@ -377,8 +394,8 @@ def report_gen_func(input_cfg):
 
 if __name__ == '__main__':
     input_cfg = {
-        'multi_dev_err_path': r'C:\Users\wyx\OneDrive\python\Data_analysis_py\multi_dev_err_plot',
-        'path_proj_dev': r'C:\Users\wyx\OneDrive\python\Data_analysis_py\result_all'
+        'multi_dev_err_path': r'C:\Users\admin\OneDrive\python\Data_analysis_py\multi_dev_err_plot',
+        'path_proj_dev': r'C:\Users\admin\OneDrive\python\Data_analysis_py\result_all'
     }
     report_gen_func(input_cfg)
     sys.exit(0)

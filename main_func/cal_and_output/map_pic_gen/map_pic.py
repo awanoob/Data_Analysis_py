@@ -8,9 +8,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 import os
 import time
 import logging
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 import tempfile
 from main_func.proxy.proxy_config import ProxyManager
+import re
 
 
 class MapGenerator:
@@ -28,7 +29,7 @@ class MapGenerator:
         try:
             options = Options()
             options.add_argument("--headless")
-            options.add_argument("--window-size=1920x1080")
+            options.add_argument("--window-size=1920,1080")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument('--disable-gpu')
@@ -36,7 +37,7 @@ class MapGenerator:
             options.add_argument('--disable-infobars')
             options.add_argument('--ignore-certificate-errors')
 
-            # 修改代理部分的判断逻辑
+            # 设置代理
             try:
                 if self.proxy_manager.has_proxy:
                     proxy_url = self.proxy_manager.get_proxy_url()
@@ -76,10 +77,9 @@ class MapGenerator:
             location=center,
             zoom_start=zoom,
             tiles=None,
-            crs = 'EPSG4326'
+            crs='EPSG4326'
         )
 
-        # 使用img_c（影像底图，经纬度投影）
         img_url = (
             "http://t7.tianditu.gov.cn/img_c/wmts?"
             "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&"
@@ -91,37 +91,22 @@ class MapGenerator:
             tiles=img_url,
             attr='天地图',
             name='天地图影像图',
-            zoomOffset = 1
+            zoomOffset=1
         ).add_to(m)
-
-        # # 添加标注图层（cia_c是经纬度投影的标注）
-        # anno_url = (
-        #     "http://t{s}.tianditu.gov.cn/cia_c/wmts?"
-        #     "SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&"
-        #     "LAYER=cia&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&"
-        #     f"TILEMATRIX={{z}}&TILEROW={{y}}&TILECOL={{x}}&tk={self.api_key}"
-        # )
-        #
-        # folium.TileLayer(
-        #     tiles=anno_url,
-        #     attr='天地图标注',
-        #     name='天地图标注',
-        #     overlay=True
-        # ).add_to(m)
 
         return m
 
-    def _add_lines_to_map(self, map_obj: folium.Map, lines_data: List[List[Tuple[float, float]]]):
+    def _add_lines_to_map(self, map_obj: folium.Map, lines_data: Dict[str, List[Tuple[float, float]]]):
         """向地图添加多条线"""
-        for i, line in enumerate(lines_data):
+        for i, (device_name, line) in enumerate(lines_data.items()):
             color = self.colors[i % len(self.colors)]
-            # 不需要转换坐标，直接使用经纬度
+            # 添加线
             folium.PolyLine(
                 locations=line,
                 weight=2,
                 color=color,
                 opacity=0.8,
-                popup=f'轨迹 {i + 1}'
+                popup=f'设备 {device_name}'
             ).add_to(map_obj)
 
         if len(lines_data) > 1:
@@ -134,7 +119,7 @@ class MapGenerator:
                             font-size: 14px;">
                     <p><strong>图例</strong></p>
             """
-            for i in range(len(lines_data)):
+            for i, device_name in enumerate(lines_data.keys()):
                 color = self.colors[i % len(self.colors)]
                 legend_html += f"""
                     <p>
@@ -143,7 +128,7 @@ class MapGenerator:
                                     height: 15px;
                                     display: inline-block;
                                     margin-right: 5px;"></span>
-                        轨迹 {i + 1}
+                        设备 {device_name}
                     </p>
                 """
             legend_html += "</div>"
@@ -190,13 +175,11 @@ class MapGenerator:
         # 计算最大跨度（度）
         max_diff = max(lat_diff, lon_diff)
 
-        # 缩放级别映射表（近似值）：
-        # 跨度 -> 缩放级别
+        # 缩放级别映射表（近似值）
         zoom_mapping = {
-            0.0001: 20,  # ~10m
-            0.001: 17,  # ~100m
+            0.001: 16,  # ~100m
             0.01: 14,  # ~1km
-            0.1: 11,  # ~10km
+            0.1: 12,  # ~10km
             1: 8,  # ~100km
             10: 5,  # ~1000km
         }
@@ -208,12 +191,12 @@ class MapGenerator:
 
         return 4  # 默认最小缩放级别
 
-    def create_maps(self, lines_data: List[List[Tuple[float, float]]],
-                    output_path_full: str, output_path_zoomed: str):
+    def create_maps(self, lines_data: Dict[str, List[Tuple[float, float]]], output_path_full: str,
+                    output_path_zoomed: str):
         """创建地图（全局视图和局部视图）"""
         try:
             # 计算所有点的边界
-            all_coords = [(lat, lon) for line in lines_data for lat, lon in line]
+            all_coords = [(lat, lon) for line in lines_data.values() for lat, lon in line]
             all_lats, all_lons = zip(*all_coords)
 
             center = [np.mean(all_lats), np.mean(all_lons)]
@@ -242,19 +225,36 @@ class MapGenerator:
             raise
 
 
-def map_generator(datapaths: Union[str, List[str]], output_path_full, output_path_zoomed) -> None:
-    """生成地图的主函数"""
+def map_generator(datapaths: Union[str, List[str]], output_path_full: str, output_path_zoomed: str) -> None:
+    """
+    生成地图的主函数
+
+    Args:
+        datapaths: 数据文件路径，可以是单个字符串或字符串列表
+        output_path_full: 完整地图输出路径
+        output_path_zoomed: 缩放地图输出路径
+    """
     try:
+        # 检查输出文件是否都已存在
+        if os.path.exists(output_path_full) and os.path.exists(output_path_zoomed):
+            logging.info(f"地图文件已存在，跳过生成: \n{output_path_full}\n{output_path_zoomed}")
+            return
+
+        # 确保输出目录存在
+        os.makedirs(os.path.dirname(output_path_full), exist_ok=True)
+        os.makedirs(os.path.dirname(output_path_zoomed), exist_ok=True)
+
         if isinstance(datapaths, str):
             datapaths = [datapaths]
 
-        lines_data = []
+        lines_data = {}
         for datapath in datapaths:
             try:
                 data = pd.read_csv(datapath, sep=" ", header=None)
+                dev_name = re.search(r'result_all\\(\d+)', datapath).group(1)
                 if not data.empty:
                     line_coords = [(row[3], row[4]) for row in data.itertuples()]
-                    lines_data.append(line_coords)
+                    lines_data[dev_name] = line_coords
             except Exception as e:
                 logging.warning(f"读取文件 {datapath} 失败: {str(e)}")
                 continue
@@ -268,6 +268,7 @@ def map_generator(datapaths: Union[str, List[str]], output_path_full, output_pat
             output_path_full,
             output_path_zoomed
         )
+        logging.info(f"地图生成成功: \n{output_path_full}\n{output_path_zoomed}")
 
     except Exception as e:
         logging.error(f"地图生成失败: {str(e)}")
