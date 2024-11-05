@@ -151,16 +151,16 @@ def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.nda
     }
 
     MAX = {
-        'pos': round(np.max(errlist_scn[:, [11]]), 4),
-        'x': round(np.max(errlist_scn[:, [2]]), 4),
-        'y': round(np.max(errlist_scn[:, [3]]), 4),
-        'alt': round(np.max(errlist_scn[:, [4]]), 4),
-        've': round(np.max(errlist_scn[:, [5]]), 4),
-        'vn': round(np.max(errlist_scn[:, [6]]), 4),
-        'vu': round(np.max(errlist_scn[:, [7]]), 4),
-        'roll': round(np.max(errlist_scn[:, [8]]), 4),
-        'pitch': round(np.max(errlist_scn[:, [9]]), 4),
-        'heading': round(np.max(errlist_scn[:, [10]]), 4)
+        'pos': round(np.max(np.abs(errlist_scn[:, [11]])), 4),
+        'x': round(np.max(np.abs(errlist_scn[:, [2]])), 4),
+        'y': round(np.max(np.abs(errlist_scn[:, [3]])), 4),
+        'alt': round(np.max(np.abs(errlist_scn[:, [4]])), 4),
+        've': round(np.max(np.abs(errlist_scn[:, [5]])), 4),
+        'vn': round(np.max(np.abs(errlist_scn[:, [6]])), 4),
+        'vu': round(np.max(np.abs(errlist_scn[:, [7]])), 4),
+        'roll': round(np.max(np.abs(errlist_scn[:, [8]])), 4),
+        'pitch': round(np.max(np.abs(errlist_scn[:, [9]])), 4),
+        'heading': round(np.max(np.abs(errlist_scn[:, [10]])), 4)
     }
     distance = round(errlist_scn[-1, 12] - errlist_scn[0, 12], 2)
     fix_ratio = round(np.sum(errlist_scn[:, [13]] == 1) / len(errlist_scn) * 100, 2)
