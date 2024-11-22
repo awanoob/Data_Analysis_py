@@ -5,8 +5,8 @@ cvrt2navplot: true
 data: []
 era_auto_all: false
 era_list: []
-out2car_coor: false
-output_cep: false
+out2car_coor: true
+output_cep: true
 path_proj: C:/Users/wyx/OneDrive/python/Data_Analysis_py/main_func
 usr_def_syserr_h: -3
 usr_def_syserr_list: []

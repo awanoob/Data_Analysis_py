@@ -16,7 +16,7 @@ import main_func.cal_and_output.report_output.styles as styles
 
 # 打开模板文档
 doc = Document(
-    r'C:\Users\wyx\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
+    r'C:\Users\admin\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
 
 default_section = doc.sections[0]
 
@@ -59,7 +59,7 @@ def get_dev_datas(folder_path, multi_folder_path):
 
     for folder in folder_paths:
         # 拼接误差统计表的路径
-        err_file = os.path.join(folder_path, folder, f"{folder}_误差统计表.csv")
+        err_file = os.path.join(folder_path, folder, "era.csv")
         err_paths.append(err_file)
 
         # 获取文件夹下子文件夹的名称（不包含'.'的文件夹）

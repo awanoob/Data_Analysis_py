@@ -3,6 +3,7 @@ import yaml
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 from window.config.settings import DEFAULT_PROJECT_CONFIG
+from main_func.window.ui_configdialog import ConfigDialog
 
 class ProjectManager:
     def __init__(self, main_window):
@@ -11,6 +12,15 @@ class ProjectManager:
         self.unsaved_changes = False
         self.last_directory = ''
         self.project_config = DEFAULT_PROJECT_CONFIG.copy()
+
+    def open_config_dialog(self):
+        """打开配置选项对话框"""
+        dialog = ConfigDialog(self.main_window)
+        if dialog.exec():  # exec() 运行对话框并等待用户交互
+            # 在这里处理用户选择的配置
+            selected_options = dialog.get_selected_options()
+            # 可以根据需求将结果保存到某个配置文件或应用到当前逻辑
+            self.project_config['output_cep'] = selected_options['isCEP']
 
     def new_project(self):
         if self.check_unsaved_changes():
@@ -86,7 +96,7 @@ class ProjectManager:
                 else:
                     return
 
-            with open(self.current_project_file, 'w') as f:
+            with open(self.current_project_file, 'w', encoding='utf-8') as f:
                 yaml.dump(self.project_config, f, allow_unicode=True)
 
             QMessageBox.information(self.main_window, "成功", "项目保存成功！")

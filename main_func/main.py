@@ -19,6 +19,7 @@ class SelectReportDialog(QtWidgets.QDialog):
         self.ui = Ui_SelectReport()
         self.ui.setupUi(self)
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -67,6 +68,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # 连接计算按钮
         self.ui.pushButton.clicked.connect(self.calculate_error_with_progress)
 
+        # 连接配置选项按钮
+        self.ui.configButton.clicked.connect(self.project_manager.open_config_dialog)
+
     def open_select_report_dialog(self):
         # 打开报告选择对话框
         dialog = SelectReportDialog(self)
@@ -74,7 +78,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def calculate_error_with_progress(self):
         """执行误差计算并显示进度"""
-        # 获取当前数据
         self.project_manager.project_config['data'] = self.table_manager.get_table1_data()
         self.project_manager.project_config['era_list'] = self.table_manager.get_table2_data()
 

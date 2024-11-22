@@ -1,282 +1,293 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>900</width>
-    <height>700</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>导航数据处理</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QLabel" name="titleLabel">
-      <property name="font">
-       <font>
-        <family>-apple-system</family>
-        <pointsize>16</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>导航数据处理</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QSplitter" name="splitter_vertical">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <widget class="QWidget" name="tableWidgetWrapper" native="true">
-       <layout class="QVBoxLayout" name="tableLayout">
-        <item>
-         <widget class="QLabel" name="fileLabel">
-          <property name="font">
-           <font>
-            <family>-apple-system</family>
-            <pointsize>12</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>文件信息</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTableWidget" name="tableWidget">
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::AllEditTriggers</set>
-          </property>
-          <property name="rowCount">
-           <number>0</number>
-          </property>
-          <property name="columnCount">
-           <number>5</number>
-          </property>
-          <column>
-           <property name="text">
-            <string>文件名</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>设备名称</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>文件格式</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>频率</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>真值文件</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="splitterWrapper" native="true">
-       <layout class="QVBoxLayout" name="splitterLayout">
-        <item>
-         <widget class="QSplitter" name="splitter">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <widget class="QWidget" name="leftWidget" native="true">
-           <layout class="QVBoxLayout" name="leftLayout">
-            <item>
-             <widget class="QLabel" name="sceneLabel">
-              <property name="font">
-               <font>
-                <family>-apple-system</family>
-                <pointsize>12</pointsize>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>场景信息</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTableWidget" name="tableWidget_2">
-              <property name="font">
-               <font>
-                <family>-apple-system</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="contextMenuPolicy">
-               <enum>Qt::CustomContextMenu</enum>
-              </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::AllEditTriggers</set>
-              </property>
-              <property name="rowCount">
-               <number>3</number>
-              </property>
-              <row/>
-              <row/>
-              <row/>
-              <column>
-               <property name="text">
-                <string>场景</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>开始时间</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>结束时间</string>
-               </property>
-              </column>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="rightWidget" native="true">
-           <layout class="QVBoxLayout" name="rightLayout">
-            <item>
-             <widget class="QLabel" name="sceneLabel_2">
-              <property name="font">
-               <font>
-                <family>-apple-system</family>
-                <pointsize>12</pointsize>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>日志输出</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTextEdit" name="logTextEdit">
-              <property name="font">
-               <font>
-                <family>-apple-system</family>
-                <pointsize>10</pointsize>
-               </font>
-              </property>
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-              <property name="placeholderText">
-               <string>日志输出...</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QProgressBar" name="progressBar">
-              <property name="value">
-               <number>0</number>
-              </property>
-              <property name="textVisible">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton">
-              <property name="text">
-               <string>计算误差</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>900</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>文件</string>
-    </property>
-    <addaction name="action_new_project"/>
-    <addaction name="action_open_project"/>
-    <addaction name="action_save_project"/>
-    <addaction name="separator"/>
-    <addaction name="action_add_data"/>
-   </widget>
-   <widget class="QMenu" name="menu_2">
-    <property name="title">
-     <string>报告</string>
-    </property>
-    <addaction name="action_generate_report"/>
-   </widget>
-   <addaction name="menu"/>
-   <addaction name="menu_2"/>
-  </widget>
-  <action name="action_new_project">
-   <property name="text">
-    <string>新建工程</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="action_generate_report">
-   <property name="text">
-    <string>生成报告</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="action_open_project">
-   <property name="text">
-    <string>打开工程</string>
-   </property>
-  </action>
-  <action name="action_save_project">
-   <property name="text">
-    <string>保存</string>
-   </property>
-  </action>
-  <action name="action_add_data">
-   <property name="text">
-    <string>添加数据</string>
-   </property>
-  </action>
- </widget>
- <resources/>
- <connections/>
+    <class>MainWindow</class>
+    <widget class="QMainWindow" name="MainWindow">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>900</width>
+                <height>700</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>导航数据处理</string>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                    <widget class="QLabel" name="titleLabel">
+                        <property name="font">
+                            <font>
+                                <family>-apple-system</family>
+                                <pointsize>16</pointsize>
+                                <bold>true</bold>
+                            </font>
+                        </property>
+                        <property name="text">
+                            <string>导航数据处理</string>
+                        </property>
+                        <property name="alignment">
+                            <set>Qt::AlignCenter</set>
+                        </property>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QSplitter" name="splitter_vertical">
+                        <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                        </property>
+                        <widget class="QWidget" name="tableWidgetWrapper" native="true">
+                            <layout class="QVBoxLayout" name="tableLayout">
+                                <item>
+                                    <widget class="QLabel" name="fileLabel">
+                                        <property name="font">
+                                            <font>
+                                                <family>-apple-system</family>
+                                                <pointsize>12</pointsize>
+                                                <bold>true</bold>
+                                            </font>
+                                        </property>
+                                        <property name="text">
+                                            <string>文件信息</string>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <widget class="QTableWidget" name="tableWidget">
+                                        <property name="contextMenuPolicy">
+                                            <enum>Qt::CustomContextMenu</enum>
+                                        </property>
+                                        <property name="editTriggers">
+                                            <set>QAbstractItemView::AllEditTriggers</set>
+                                        </property>
+                                        <property name="rowCount">
+                                            <number>0</number>
+                                        </property>
+                                        <property name="columnCount">
+                                            <number>5</number>
+                                        </property>
+                                        <column>
+                                            <property name="text">
+                                                <string>文件名</string>
+                                            </property>
+                                        </column>
+                                        <column>
+                                            <property name="text">
+                                                <string>设备名称</string>
+                                            </property>
+                                        </column>
+                                        <column>
+                                            <property name="text">
+                                                <string>文件格式</string>
+                                            </property>
+                                        </column>
+                                        <column>
+                                            <property name="text">
+                                                <string>频率</string>
+                                            </property>
+                                        </column>
+                                        <column>
+                                            <property name="text">
+                                                <string>真值文件</string>
+                                            </property>
+                                        </column>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </widget>
+                        <widget class="QWidget" name="splitterWrapper" native="true">
+                            <layout class="QVBoxLayout" name="splitterLayout">
+                                <item>
+                                    <widget class="QSplitter" name="splitter">
+                                        <property name="orientation">
+                                            <enum>Qt::Horizontal</enum>
+                                        </property>
+                                        <widget class="QWidget" name="leftWidget" native="true">
+                                            <layout class="QVBoxLayout" name="leftLayout">
+                                                <item>
+                                                    <widget class="QLabel" name="sceneLabel">
+                                                        <property name="font">
+                                                            <font>
+                                                                <family>-apple-system</family>
+                                                                <pointsize>12</pointsize>
+                                                                <bold>true</bold>
+                                                            </font>
+                                                        </property>
+                                                        <property name="text">
+                                                            <string>场景信息</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item>
+                                                    <widget class="QTableWidget" name="tableWidget_2">
+                                                        <property name="font">
+                                                            <font>
+                                                                <family>-apple-system</family>
+                                                                <pointsize>10</pointsize>
+                                                            </font>
+                                                        </property>
+                                                        <property name="contextMenuPolicy">
+                                                            <enum>Qt::CustomContextMenu</enum>
+                                                        </property>
+                                                        <property name="editTriggers">
+                                                            <set>QAbstractItemView::AllEditTriggers</set>
+                                                        </property>
+                                                        <property name="rowCount">
+                                                            <number>3</number>
+                                                        </property>
+                                                        <row/>
+                                                        <row/>
+                                                        <row/>
+                                                        <column>
+                                                            <property name="text">
+                                                                <string>场景</string>
+                                                            </property>
+                                                        </column>
+                                                        <column>
+                                                            <property name="text">
+                                                                <string>开始时间</string>
+                                                            </property>
+                                                        </column>
+                                                        <column>
+                                                            <property name="text">
+                                                                <string>结束时间</string>
+                                                            </property>
+                                                        </column>
+                                                    </widget>
+                                                </item>
+                                            </layout>
+                                        </widget>
+                                        <widget class="QWidget" name="rightWidget" native="true">
+                                            <layout class="QVBoxLayout" name="rightLayout">
+                                                <item>
+                                                    <widget class="QLabel" name="sceneLabel_2">
+                                                        <property name="font">
+                                                            <font>
+                                                                <family>-apple-system</family>
+                                                                <pointsize>12</pointsize>
+                                                                <bold>true</bold>
+                                                            </font>
+                                                        </property>
+                                                        <property name="text">
+                                                            <string>日志输出</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item>
+                                                    <widget class="QTextEdit" name="logTextEdit">
+                                                        <property name="font">
+                                                            <font>
+                                                                <family>-apple-system</family>
+                                                                <pointsize>10</pointsize>
+                                                            </font>
+                                                        </property>
+                                                        <property name="readOnly">
+                                                            <bool>true</bool>
+                                                        </property>
+                                                        <property name="placeholderText">
+                                                            <string>日志输出...</string>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item>
+                                                    <widget class="QProgressBar" name="progressBar">
+                                                        <property name="value">
+                                                            <number>0</number>
+                                                        </property>
+                                                        <property name="textVisible">
+                                                            <bool>true</bool>
+                                                        </property>
+                                                    </widget>
+                                                </item>
+                                                <item>
+                                                    <layout class="QHBoxLayout" name="buttonLayout">
+                                                        <item>
+                                                            <widget class="QPushButton" name="pushButton">
+                                                                <property name="text">
+                                                                    <string>计算误差</string>
+                                                                </property>
+                                                            </widget>
+                                                        </item>
+                                                        <item>
+                                                            <widget class="QPushButton" name="configButton">
+                                                                <property name="text">
+                                                                    <string>配置选项</string>
+                                                                </property>
+                                                            </widget>
+                                                        </item>
+                                                    </layout>
+                                                </item>
+                                            </layout>
+                                        </widget>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </widget>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QMenuBar" name="menubar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>900</width>
+                    <height>22</height>
+                </rect>
+            </property>
+            <widget class="QMenu" name="menu">
+                <property name="title">
+                    <string>文件</string>
+                </property>
+                <addaction name="action_new_project"/>
+                <addaction name="action_open_project"/>
+                <addaction name="action_save_project"/>
+                <addaction name="separator"/>
+                <addaction name="action_add_data"/>
+            </widget>
+            <widget class="QMenu" name="menu_2">
+                <property name="title">
+                    <string>报告</string>
+                </property>
+                <addaction name="action_generate_report"/>
+            </widget>
+            <addaction name="menu"/>
+            <addaction name="menu_2"/>
+        </widget>
+        <action name="action_new_project">
+            <property name="text">
+                <string>新建工程</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+O</string>
+            </property>
+        </action>
+        <action name="action_generate_report">
+            <property name="text">
+                <string>生成报告</string>
+            </property>
+            <property name="shortcut">
+                <string>Ctrl+R</string>
+            </property>
+        </action>
+        <action name="action_open_project">
+            <property name="text">
+                <string>打开工程</string>
+            </property>
+        </action>
+        <action name="action_save_project">
+            <property name="text">
+                <string>保存</string>
+            </property>
+        </action>
+        <action name="action_add_data">
+            <property name="text">
+                <string>添加数据</string>
+            </property>
+        </action>
+    </widget>
+    <resources/>
+    <connections/>
 </ui>
