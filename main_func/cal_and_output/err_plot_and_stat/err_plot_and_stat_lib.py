@@ -470,8 +470,8 @@ def multi_dev_err_plot(err_dict, input_cfg):
         for k in input_cfg['data_test']:
             err_scn_list = []
             for j in range(len(start_t_list)):
-                start_t = start_t_list[j]
-                end_t = end_t_list[j]
+                start_t = float(start_t_list[j])  # 将start_t从字符串转换为浮点数
+                end_t = float(end_t_list[j])  # 将end_t从字符串转换为浮点数
                 time_list = err_dict[k['dev_name']][:, 1]
                 indx = np.where((time_list >= start_t) & (time_list < end_t))[0]
                 err_scn_list.append(err_dict[k['dev_name']][indx])
@@ -525,7 +525,7 @@ def multi_dev_err_plot(err_dict, input_cfg):
         fig_plt([err_dict_scn[k][:, [1]] for k in scn_dev_name_list],
                 [[err_dict_scn[k][:, [8]] for k in scn_dev_name_list],
                  [err_dict_scn[k][:, [9]] for k in scn_dev_name_list],
-                 [err_dict_scn[k][:[10]] for k in scn_dev_name_list]],
+                 [err_dict_scn[k][:, [10]] for k in scn_dev_name_list]],
                 ['横滚角误差', '俯仰角误差', '航向角误差'],
                 'Time/s',
                 '/°',

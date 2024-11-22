@@ -45,7 +45,6 @@ def cal_Func(yaml_path: str):
     for i in range(len(data_test)):
         # 根据被测数据文件名称生成项目子路径
         path_proj_dev = join(input_cfg['path_proj'], 'result_all', data_test[i]['dev_name'])
-        input_cfg['path_proj_dev'] = path_proj_dev
         # 创建项目子路径
         if not exists(path_proj_dev):
             makedirs(path_proj_dev)
@@ -97,10 +96,13 @@ def cal_Func(yaml_path: str):
         # 输出多设备误差对比图
         multi_dev_err_plot(multi_dev_err_dict, input_cfg)
 
+    # 将输出报告需要的参数添加到input_cfg
+    input_cfg['multi_dev_err_path'] = input_cfg['path_proj'] + '/multi_dev_err_plot'
+    input_cfg['path_proj_dev'] = path_proj_dev
     # 输出报告
     report_gen_func(input_cfg)
 
 
 # test
 if __name__ == '__main__':
-    cal_Func(r"J:\CODE\VSCode\Python\pytest\data_analysis_test\test.yaml")
+    cal_Func(r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\11-22_test1.yaml")

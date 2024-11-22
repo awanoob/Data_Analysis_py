@@ -11,12 +11,14 @@ import pandas as pd
 import os
 import glob
 import sys
-from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
-import main_func.cal_and_output.report_output.styles as styles
+# from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
+# import main_func.cal_and_output.report_output.styles as styles
+from cal_and_output.map_pic_gen.map_pic import map_generator
+import cal_and_output.report_output.styles as styles
 
 # 打开模板文档
 doc = Document(
-    r'C:\Users\wyx\OneDrive\python\Data_analysis_py\main_func\cal_and_output\report_output\default\module_default.docx')
+    r'.\cal_and_output\report_output\default\module_default.docx')
 
 default_section = doc.sections[0]
 
@@ -53,30 +55,33 @@ def get_dev_datas(folder_path, multi_folder_path):
     folder_paths = os.listdir(folder_path)
     err_paths = []
     scene_paths = {}
+    # 获取folder_path的最后一个文件夹名
+    folder_name = os.path.basename(folder_path)
+    # 拼接误差统计表的路径
+    err_file = os.path.join(folder_path, f"{folder_name}_误差统计表.csv")
+    err_paths.append(err_file)
+
 
     # 存储每个场景对应的输出文件夹路径
     scene_output_paths = {}
 
     for folder in folder_paths:
-        # 拼接误差统计表的路径
-        err_file = os.path.join(folder_path, folder, f"{folder}_误差统计表.csv")
-        err_paths.append(err_file)
-
         # 获取文件夹下子文件夹的名称（不包含'.'的文件夹）
-        scene_folder_paths = [name for name in os.listdir(os.path.join(folder_path, folder)) if '.' not in name]
+        if os.path.isdir(os.path.join(folder_path, folder)):
+            scene_folder_paths = os.path.join(folder_path, folder)
 
-        # 记录每个场景的输出路径
-        for scene_folder in scene_folder_paths:
-            scene_output_path = os.path.join(folder_path, scene_folder)
-            scene_output_paths[scene_folder] = scene_output_path
+            # 记录每个场景的输出路径
+            for scene_folder in scene_folder_paths:
+                scene_output_path = os.path.join(folder_path, scene_folder)
+                scene_output_paths[scene_folder] = scene_output_path
 
-            # 初始化 scene_paths 中的 scene_folder 列表
-            if scene_folder not in scene_paths:
-                scene_paths[scene_folder] = []
+                # 初始化 scene_paths 中的 scene_folder 列表
+                if scene_folder not in scene_paths:
+                    scene_paths[scene_folder] = []
 
-            # 拼接 test.navplot 文件路径并添加到 scene_paths 字典的对应列表中
-            navplot_file = os.path.join(folder_path, folder, scene_folder, f"{scene_folder}_test.navplot")
-            scene_paths[scene_folder].append(navplot_file)
+                # 拼接 test.navplot 文件路径并添加到 scene_paths 字典的对应列表中
+                navplot_file = os.path.join(folder_path, folder, scene_folder, f"{scene_folder}_test.navplot")
+                scene_paths[scene_folder].append(navplot_file)
 
     # 使用字典存储每个文件夹名称与其对应的DataFrame
     xlsx_datas = {}
@@ -436,8 +441,8 @@ def report_gen_func(input_cfg):
 
 if __name__ == '__main__':
     input_cfg = {
-        'multi_dev_err_path': r"C:\Users\admin\Desktop\dongfeng\multi_err_figure",
-        'path_proj_dev': r"C:\Users\admin\Desktop\dongfeng\xlsx"
+        'multi_dev_err_path': r'C:\Users\admin\OneDrive\python\Data_analysis_py\multi_dev_err_plot',
+        'path_proj_dev': r'C:\Users\admin\OneDrive\python\Data_analysis_py\result_all'
     }
     report_gen_func(input_cfg)
     sys.exit(0)
