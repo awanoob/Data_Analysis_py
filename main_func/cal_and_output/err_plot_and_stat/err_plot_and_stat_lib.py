@@ -303,11 +303,12 @@ def dr_err_stat(errlist_scn, scene_name):
     dr_err_time_heading_dict, dr_err_dis_heading_dict = cal_err_with_ev(errlist_scn[:turnel_index, 10], time_array, dis_array)
 
     # 计算出隧道后的恢复固定解时间
-    if round(np.sum(errlist_scn[:turnel_index, [13]] == 6) / len(errlist_scn[:turnel_index, [13]]) * 100, 2) > 80:
-        index_fix = np.where(errlist_scn[turnel_index:, 13] == 1)[0]
-        if len(index_fix) == 0:
-            fix_time = '>30s'
-        fix_time = errlist_scn[turnel_index + index_fix[0], 1] - errlist_scn[turnel_index, 1]
+    # if round(np.sum(errlist_scn[:turnel_index, [13]] == 6) / len(errlist_scn[:turnel_index, [13]]) * 100, 2) > 80:
+    index_fix = np.where(errlist_scn[turnel_index:, 13] == 1)[0]
+    if len(index_fix) == 0:
+        fix_time = '>30s'
+    fix_time = errlist_scn[turnel_index + index_fix[0], 1] - errlist_scn[turnel_index, 1]
+
 
     # 生成DR误差统计列表
     L_x = np.array([

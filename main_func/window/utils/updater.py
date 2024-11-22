@@ -9,6 +9,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox, QProgressDialog
 from PyQt6.QtCore import Qt
 from window.config.settings import CURRENT_VERSION, GITHUB_API_URL
+import logging
 
 class DownloadThread(QThread):
     progress_signal = pyqtSignal(int)
