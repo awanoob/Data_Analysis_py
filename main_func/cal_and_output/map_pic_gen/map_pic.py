@@ -12,7 +12,7 @@ from typing import List, Tuple, Union, Dict
 import tempfile
 # from proxy.proxy_config import ProxyManager
 import re
-from main_func.proxy.proxy_config import ProxyManager
+# from main_func.proxy.proxy_config import ProxyManager
 # from webdrivermanager_cn.chrome import ChromeDriverManager
 
 from selenium.webdriver.edge.options import Options
@@ -50,8 +50,8 @@ class MapGenerator:
                 service=Service(EdgeChromiumDriverManager().install()),
                 options=options
             )
-            self._driver.set_page_load_timeout(60)
-            self._driver.set_script_timeout(60)
+            self._driver.set_page_load_timeout(30)
+            self._driver.set_script_timeout(30)
             return self._driver
 
         except Exception as e:
@@ -144,7 +144,7 @@ class MapGenerator:
             # 创建driver并获取截图
             driver = self._create_edge_driver()
             driver.get(f'file://{os.path.abspath(temp_html)}')
-            time.sleep(60)  # 给额外时间确保完全加载
+            time.sleep(10)  # 给额外时间确保完全加载
             driver.save_screenshot(output_path)
 
         except Exception as e:

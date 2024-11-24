@@ -38,7 +38,7 @@ def cal_Func(yaml_path: str):
     input_cfg['data_test'] = data_test
 
     # 多设备误差对比误差列表字典初始化
-    if len(input_cfg['data']) >= 1 and input_cfg['output_multi_fig']:
+    if len(input_cfg['data']) >= 1:
         multi_dev_err_dict = {k['dev_name']: np.array([]) for k in data_test}
 
     # 基准设备数据读取

@@ -10,7 +10,7 @@ color_lib = {'dark_blue': '#0072BD', 'orange': '#D95319', 'yellow': '#EDB120', '
 
 def sigma(err: np.ndarray, input_cfg) -> dict:
     err = np.abs(err)
-    err = np.sort(err)
+    err = np.sort(err, axis=0)
     row_len = len(err)
 
     if input_cfg['output_cep']:
@@ -80,61 +80,60 @@ def cal_err_with_ev(errlist: np.ndarray, time_array: np.ndarray, dis_array: np.n
 
 
 def err_time_plot_stat(errlist_scn, path_scene, scene_name, input_cfg) -> np.ndarray:
-    if input_cfg['output_fig']:
-        # 生成场景误差时间图像
-        fig_xy_path = join(path_scene, f'{scene_name}_xy.png')
-        fig_pos_alt_path = join(path_scene, f'{scene_name}_pos_alt.png')
-        fig_vel_path = join(path_scene, f'{scene_name}_vel.png')
-        fig_att_path = join(path_scene, f'{scene_name}_att.png')
-        # 输出横纵向误差图像
-        fig_plt(
-            [errlist_scn[:, [1]]],
-            [[errlist_scn[:, [2]]], [errlist_scn[:, [3]]]],
-            ['横向误差', '纵向误差'],
-            'Time/s',
-            '/m',
-            fig_xy_path
-        )
-        # 输出水平、高程误差图像
-        fig_plt(
-            [errlist_scn[:, [1]]],
-            [[errlist_scn[:, [11]]], [errlist_scn[:, [4]]]],
-            ['水平误差', '高程误差'],
-            'Time/s',
-            '/m',
-            fig_pos_alt_path
-        )
-        # 输出速度误差图像
-        fig_plt(
-            [errlist_scn[:, [1]]],
-            [[errlist_scn[:, [5]]], [errlist_scn[:, [6]]], [errlist_scn[:, [7]]]],
-            ['ve误差', 'vn误差', 'vu误差'],
-            'Time/s',
-            '/(m/s)',
-            fig_vel_path
-        )
-        # 输出姿态角误差图像
-        fig_plt(
-            [errlist_scn[:, [1]]],
-            [[errlist_scn[:, [8]]], [errlist_scn[:, [9]]], [errlist_scn[:, [10]]]],
-            ['横滚角误差', '俯仰角误差', '航向角误差'],
-            'Time/s',
-            '/°',
-            fig_att_path
-        )
+    # 生成场景误差时间图像
+    fig_xy_path = join(path_scene, f'{scene_name}_xy.png')
+    fig_pos_alt_path = join(path_scene, f'{scene_name}_pos_alt.png')
+    fig_vel_path = join(path_scene, f'{scene_name}_vel.png')
+    fig_att_path = join(path_scene, f'{scene_name}_att.png')
+    # 输出横纵向误差图像
+    fig_plt(
+        [errlist_scn[:, [1]]],
+        [[errlist_scn[:, [2]]], [errlist_scn[:, [3]]]],
+        ['横向误差', '纵向误差'],
+        'Time/s',
+        '/m',
+        fig_xy_path
+    )
+    # 输出水平、高程误差图像
+    fig_plt(
+        [errlist_scn[:, [1]]],
+        [[errlist_scn[:, [11]]], [errlist_scn[:, [4]]]],
+        ['水平误差', '高程误差'],
+        'Time/s',
+        '/m',
+        fig_pos_alt_path
+    )
+    # 输出速度误差图像
+    fig_plt(
+        [errlist_scn[:, [1]]],
+        [[errlist_scn[:, [5]]], [errlist_scn[:, [6]]], [errlist_scn[:, [7]]]],
+        ['ve误差', 'vn误差', 'vu误差'],
+        'Time/s',
+        '/(m/s)',
+        fig_vel_path
+    )
+    # 输出姿态角误差图像
+    fig_plt(
+        [errlist_scn[:, [1]]],
+        [[errlist_scn[:, [8]]], [errlist_scn[:, [9]]], [errlist_scn[:, [10]]]],
+        ['横滚角误差', '俯仰角误差', '航向角误差'],
+        'Time/s',
+        '/°',
+        fig_att_path
+    )
 
     # 计算统计量
     RMS = {
-        'pos': round(np.sqrt(np.mean(np.power(errlist_scn[:, [11]], 2))), 4),
-        'x': round(np.sqrt(np.mean(np.power(errlist_scn[:, [2]], 2))), 4),
-        'y': round(np.sqrt(np.mean(np.power(errlist_scn[:, [3]], 2))), 4),
-        'alt': round(np.sqrt(np.mean(np.power(errlist_scn[:, [4]], 2))), 4),
-        've': round(np.sqrt(np.mean(np.power(errlist_scn[:, [5]], 2))), 4),
-        'vn': round(np.sqrt(np.mean(np.power(errlist_scn[:, [6]], 2))), 4),
-        'vu': round(np.sqrt(np.mean(np.power(errlist_scn[:, [7]], 2))), 4),
-        'roll': round(np.sqrt(np.mean(np.power(errlist_scn[:, [8]], 2))), 4),
-        'pitch': round(np.sqrt(np.mean(np.power(errlist_scn[:, [9]], 2))), 4),
-        'heading': round(np.sqrt(np.mean(np.power(errlist_scn[:, [10]], 2))), 4)
+        'pos': round(np.sqrt(np.mean(np.square(errlist_scn[:, [11]]))), 4),
+        'x': round(np.sqrt(np.mean(np.square(errlist_scn[:, [2]]))), 4),
+        'y': round(np.sqrt(np.mean(np.square(errlist_scn[:, [3]]))), 4),
+        'alt': round(np.sqrt(np.mean(np.square(errlist_scn[:, [4]]))), 4),
+        've': round(np.sqrt(np.mean(np.square(errlist_scn[:, [5]]))), 4),
+        'vn': round(np.sqrt(np.mean(np.square(errlist_scn[:, [6]]))), 4),
+        'vu': round(np.sqrt(np.mean(np.square(errlist_scn[:, [7]]))), 4),
+        'roll': round(np.sqrt(np.mean(np.square(errlist_scn[:, [8]]))), 4),
+        'pitch': round(np.sqrt(np.mean(np.square(errlist_scn[:, [9]]))), 4),
+        'heading': round(np.sqrt(np.mean(np.square(errlist_scn[:, [10]]))), 4)
     }
 
     SIGMA = {

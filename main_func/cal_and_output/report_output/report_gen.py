@@ -11,14 +11,14 @@ import pandas as pd
 import os
 import glob
 import sys
-from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
-import main_func.cal_and_output.report_output.styles as styles
-# from cal_and_output.map_pic_gen.map_pic import map_generator
-# import cal_and_output.report_output.styles as styles
+# from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
+# import main_func.cal_and_output.report_output.styles as styles
+from cal_and_output.map_pic_gen.map_pic import map_generator
+import cal_and_output.report_output.styles as styles
 
 # 打开模板文档
-# doc = Document(r'.\cal_and_output\report_output\default\module_default.docx')
-doc = Document(r'.\default\module_default.docx')
+doc = Document(r'.\cal_and_output\report_output\default\module_default.docx')
+# doc = Document(r'.\default\module_default.docx')
 
 default_section = doc.sections[0]
 
@@ -434,13 +434,14 @@ def report_gen_func(input_cfg):
     # 第三章
     write_chapter3()
     # 保存文档
-    doc.save(r'C:\Users\wyx\OneDrive\python\proj_test\测试报告.docx')
+    doc.save(os.path.join(input_cfg['path_proj'], '测试报告.docx'))
 
 
 if __name__ == '__main__':
     input_cfg = {
-        'multi_dev_err_path': r"C:\Users\wyx\OneDrive\python\proj_test\multi_dev_err_plot",
-        'path_proj_dev': r"C:\Users\wyx\OneDrive\python\proj_test\result_all"
+        'path_proj': r'J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test',
+        'multi_dev_err_path': r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\multi_dev_err_plot",
+        'path_proj_dev': r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\result_all"
     }
     report_gen_func(input_cfg)
     sys.exit(0)

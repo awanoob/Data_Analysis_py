@@ -3,7 +3,8 @@ import yaml
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
 from window.config.settings import DEFAULT_PROJECT_CONFIG
-from main_func.window.ui_configdialog import ConfigDialog
+# from main_func.window.ui_configdialog import ConfigDialog
+from window.ui_configdialog import ConfigDialog
 
 class ProjectManager:
     def __init__(self, main_window):
