@@ -111,6 +111,4 @@ if __name__ == '__main__':
     pr.enable()
     cal_Func(r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\11-22_test1.yaml")
     pr.disable()
-    pr.print_stats(sort='time')
-    pr.dump_stats('cal_func.prof')
-    flameprof.flameprof(pr, filename='cal_func_flame.svg')
+    pr.dump_stats('cal_func_1.prof')

@@ -63,28 +63,22 @@ def check_deg(deg_input: np.ndarray) -> np.ndarray:
 
 
 def syserr_cal_alg(data: np.ndarray) -> float:
-    for num in range(5):
-        numdata = []
-        me = np.mean(data)
-        n = len(data)
-        newdata = deepcopy(data)
-        olddata = deepcopy(data)
-        for i in range(n):
-            olddata[i] = olddata[i] - me
-            newdata[i] = abs(olddata[i])
-        newdata.sort()
-        if newdata != []:
-            sigma = newdata[int(n / 2)] / 0.6745 * 2.5 # 2.5倍中值绝对偏差
+    data = data.copy()  # 避免修改原始数据
+    for _ in range(5):
+        mean_val = np.mean(data)
+        deviations = np.abs(data - mean_val)  # 计算绝对偏差
+        sorted_devs = np.sort(deviations)    # 排序绝对偏差
+
+        if sorted_devs.size > 0:
+            # 计算 2.5 倍中值绝对偏差的阈值
+            sigma = sorted_devs[int(len(sorted_devs) / 2)] / 0.6745 * 2.5
         else:
             sigma = 0
-        for k in range(n):
-            if abs(olddata[k]) > sigma:
-                numdata.append(k)
-        numdata.sort(reverse=True)
-        for m in numdata:
-            np.delete(data, m)
-        syserr = np.mean(data)
-    return syserr
+
+        # 生成布尔掩码，过滤掉偏差超过阈值的元素
+        mask = deviations <= sigma
+        data = data[mask]  # 应用掩码，保留符合条件的数据
+    return np.mean(data)
 
 
 def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
@@ -106,6 +100,8 @@ def get_syserr(x, y, alt, roll, pitch, heading, input_cfg, postype) -> dict:
             syserr[key] = syserr_cal_alg(data_fix)
         elif if_cal_syserr in [1, 2, 5, 6]:
             syserr[key] = input_cfg["usr_def_syserr_list"][i]
+        else:
+            print(f"System error of {key} is not calculated, set to zero\n")
 
     return syserr
 
