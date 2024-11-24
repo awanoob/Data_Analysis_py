@@ -10,7 +10,7 @@ import time
 import logging
 from typing import List, Tuple, Union, Dict
 import tempfile
-from main_func.proxy.proxy_config import ProxyManager
+from proxy.proxy_config import ProxyManager
 import re
 
 

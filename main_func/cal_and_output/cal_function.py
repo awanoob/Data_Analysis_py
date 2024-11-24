@@ -13,6 +13,8 @@ from cal_and_output.err_plot_and_stat.err_plot_and_stat_lib import *
 from cal_and_output.err_plot_and_stat.result_gen import result_gen_func
 from cal_and_output.report_output.report_gen import report_gen_func
 from cal_and_output.proj_cfg_read import yaml_read
+import cProfile
+import flameprof
 
 
 def cal_Func(yaml_path: str):
@@ -98,11 +100,17 @@ def cal_Func(yaml_path: str):
 
     # 将输出报告需要的参数添加到input_cfg
     input_cfg['multi_dev_err_path'] = input_cfg['path_proj'] + '/multi_dev_err_plot'
-    input_cfg['path_proj_dev'] = path_proj_dev
+    input_cfg['path_proj_dev'] = input_cfg['path_proj'] + '/result_all'
     # 输出报告
     report_gen_func(input_cfg)
 
 
 # test
 if __name__ == '__main__':
+    pr = cProfile.Profile()
+    pr.enable()
     cal_Func(r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\11-22_test1.yaml")
+    pr.disable()
+    pr.print_stats(sort='time')
+    pr.dump_stats('cal_func.prof')
+    flameprof.flameprof(pr, filename='cal_func_flame.svg')
