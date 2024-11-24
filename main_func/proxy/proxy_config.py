@@ -24,7 +24,9 @@ class ProxyManager:
         if not hasattr(self, 'initialized'):
             self.proxy_settings = self._load_proxy_settings()
             if self.proxy_settings:
-                self._setup_proxy()
+                self._setup_proxy()  # 只有代理存在时才配置
+            else:
+                logging.info("未加载到代理设置，程序将在无代理模式下运行")
             self.initialized = True
 
     def _get_windows_proxy_settings(self) -> Optional[Dict[str, str]]:
@@ -106,6 +108,12 @@ class ProxyManager:
 
     def _setup_proxy(self):
         """设置全局代理"""
+        if not self.proxy_settings:  # 代理设置为空，清除环境变量
+            os.environ.pop('HTTP_PROXY', None)
+            os.environ.pop('HTTPS_PROXY', None)
+            os.environ.pop('NO_PROXY', None)
+            logging.info("未检测到代理设置，已清除代理环境变量")
+            return
         try:
             # 设置环境变量
             if 'https' in self.proxy_settings:
@@ -130,20 +138,23 @@ class ProxyManager:
         """设置Qt应用的代理"""
         try:
             proxy_url = self.get_proxy_url()
-            if proxy_url:
-                url = QUrl(proxy_url)
-                proxy = QNetworkProxy()
-                proxy.setType(QNetworkProxy.ProxyType.HttpProxy)
-                proxy.setHostName(url.host())
-                if url.port() != -1:
-                    proxy.setPort(url.port())
+            if not proxy_url:  # 无代理，跳过配置
+                logging.info("未检测到Qt代理URL，跳过Qt代理配置")
+                return
 
-                # 设置不使用代理的地址
-                if 'bypass' in self.proxy_settings:
-                    proxy.setHostName(','.join(self.proxy_settings['bypass']))
+            url = QUrl(proxy_url)
+            proxy = QNetworkProxy()
+            proxy.setType(QNetworkProxy.ProxyType.HttpProxy)
+            proxy.setHostName(url.host())
+            if url.port() != -1:
+                proxy.setPort(url.port())
 
-                QNetworkProxy.setApplicationProxy(proxy)
-                logging.info("Qt代理设置成功")
+            # 设置不使用代理的地址
+            if 'bypass' in self.proxy_settings:
+                proxy.setHostName(','.join(self.proxy_settings['bypass']))
+
+            QNetworkProxy.setApplicationProxy(proxy)
+            logging.info("Qt代理设置成功")
         except Exception as e:
             logging.error(f"设置Qt代理时出错: {str(e)}")
 
@@ -155,18 +166,27 @@ class ProxyManager:
 
     def get_urllib3_pool(self, server_hostname: Optional[str] = None) -> urllib3.PoolManager:
         """获取配置好代理的urllib3连接池"""
-        if self.proxy_settings:
-            proxy_url = self.get_proxy_url()
-            return urllib3.ProxyManager(
-                proxy_url,
+        try:
+            if self.proxy_settings:
+                proxy_url = self.get_proxy_url()
+                if proxy_url:
+                    return urllib3.ProxyManager(
+                        proxy_url,
+                        cert_reqs='CERT_REQUIRED',
+                        ca_certs=certifi.where(),
+                        server_hostname=server_hostname
+                    )
+            # 如果没有代理设置，返回默认连接池
+            return urllib3.PoolManager(
                 cert_reqs='CERT_REQUIRED',
-                ca_certs=certifi.where(),
-                server_hostname=server_hostname
+                ca_certs=certifi.where()
             )
-        return urllib3.PoolManager(
-            cert_reqs='CERT_REQUIRED',
-            ca_certs=certifi.where()
-        )
+        except Exception as e:
+            logging.error(f"获取urllib3连接池时出错: {str(e)}")
+            return urllib3.PoolManager(
+                cert_reqs='CERT_REQUIRED',
+                ca_certs=certifi.where()
+            )
 
     def get_chrome_options(self) -> Dict:
         """获取Chrome代理设置"""

@@ -2,16 +2,25 @@ import folium
 import numpy as np
 import pandas as pd
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import os
 import time
 import logging
 from typing import List, Tuple, Union, Dict
 import tempfile
-from proxy.proxy_config import ProxyManager
+# from proxy.proxy_config import ProxyManager
 import re
+from main_func.proxy.proxy_config import ProxyManager
+# from webdrivermanager_cn.chrome import ChromeDriverManager
+
+from selenium.webdriver.edge.options import Options
+from selenium.webdriver.edge.service import Service
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class MapGenerator:
@@ -21,45 +30,32 @@ class MapGenerator:
             '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
         ]
         self.api_key = "baef27b004fae0eca6b5187854d3f1af"
-        self.proxy_manager = ProxyManager()
         self._driver = None
 
-    def _create_chrome_driver(self):
-        """创建Chrome WebDriver，支持代理设置"""
+    def _create_edge_driver(self):
+        """创建Edge WebDriver，支持代理设置"""
         try:
             options = Options()
-            options.add_argument("--headless")
-            options.add_argument("--window-size=1920,1080")
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument('--disable-gpu')
-            options.add_argument('--disable-extensions')
-            options.add_argument('--disable-infobars')
-            options.add_argument('--ignore-certificate-errors')
+            # options.add_argument("--headless")
+            options.add_argument("--window-size=1280,960")
+            # options.add_argument("--no-sandbox")
+            # options.add_argument("--disable-dev-shm-usage")
+            # options.add_argument('--disable-gpu')
+            # options.add_argument('--disable-extensions')
+            # options.add_argument('--disable-infobars')
+            # options.add_argument('--ignore-certificate-errors')
 
-            # 设置代理
-            try:
-                if self.proxy_manager.has_proxy:
-                    proxy_url = self.proxy_manager.get_proxy_url()
-                    if proxy_url:
-                        logging.info(f"使用代理：{proxy_url}")
-                        options.add_argument(f'--proxy-server={proxy_url}')
-                        if 'bypass' in self.proxy_manager.proxy_settings:
-                            bypass_list = ','.join(self.proxy_manager.proxy_settings['bypass'])
-                            options.add_argument(f'--proxy-bypass-list={bypass_list}')
-            except Exception as proxy_error:
-                logging.warning(f"代理设置失败，将不使用代理: {str(proxy_error)}")
-
-            self._driver = webdriver.Chrome(
-                service=Service(ChromeDriverManager().install()),
+            # 初始化 Edge WebDriver
+            self._driver = webdriver.Edge(
+                service=Service(EdgeChromiumDriverManager().install()),
                 options=options
             )
-            self._driver.set_page_load_timeout(30)
-            self._driver.set_script_timeout(30)
+            self._driver.set_page_load_timeout(60)
+            self._driver.set_script_timeout(60)
             return self._driver
 
         except Exception as e:
-            logging.error(f"创建Chrome WebDriver失败: {str(e)}")
+            logging.error(f"创建Edge WebDriver失败: {str(e)}")
             raise
 
     def _cleanup_driver(self):
@@ -146,23 +142,24 @@ class MapGenerator:
             map_obj.save(temp_html)
 
             # 创建driver并获取截图
-            driver = self._create_chrome_driver()
+            driver = self._create_edge_driver()
             driver.get(f'file://{os.path.abspath(temp_html)}')
-            time.sleep(3)  # 等待地图加载
+            time.sleep(60)  # 给额外时间确保完全加载
             driver.save_screenshot(output_path)
 
         except Exception as e:
             logging.error(f"保存地图截图失败: {str(e)}")
             raise
         finally:
-            # 清理资源
-            self._cleanup_driver()
-            # 删除临时文件
-            if temp_html and os.path.exists(temp_html):
-                try:
-                    os.unlink(temp_html)
-                except Exception as e:
-                    logging.warning(f"删除临时文件失败: {str(e)}")
+            pass
+            # # 清理资源
+            # self._cleanup_driver()
+            # # 删除临时文件
+            # if temp_html and os.path.exists(temp_html):
+            #     try:
+            #         os.unlink(temp_html)
+            #     except Exception as e:
+            #         logging.warning(f"删除临时文件失败: {str(e)}")
 
     def _calculate_zoom_level(self, bounds: List[List[float]]) -> int:
         """
@@ -177,11 +174,11 @@ class MapGenerator:
 
         # 缩放级别映射表（近似值）
         zoom_mapping = {
-            0.001: 16,  # ~100m
-            0.01: 14,  # ~1km
-            0.1: 12,  # ~10km
-            1: 8,  # ~100km
-            10: 5,  # ~1000km
+            0.001: 17,  # ~100m
+            0.01: 16,  # ~1km
+            0.1: 15,  # ~10km
+            1: 14,  # ~100km
+            10: 13,  # ~1000km
         }
 
         # 找到最接近的缩放级别

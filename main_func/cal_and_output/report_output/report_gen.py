@@ -11,14 +11,14 @@ import pandas as pd
 import os
 import glob
 import sys
-# from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
-# import main_func.cal_and_output.report_output.styles as styles
-from cal_and_output.map_pic_gen.map_pic import map_generator
-import cal_and_output.report_output.styles as styles
+from main_func.cal_and_output.map_pic_gen.map_pic import map_generator
+import main_func.cal_and_output.report_output.styles as styles
+# from cal_and_output.map_pic_gen.map_pic import map_generator
+# import cal_and_output.report_output.styles as styles
 
 # 打开模板文档
-doc = Document(
-    r'.\cal_and_output\report_output\default\module_default.docx')
+# doc = Document(r'.\cal_and_output\report_output\default\module_default.docx')
+doc = Document(r'.\default\module_default.docx')
 
 default_section = doc.sections[0]
 
@@ -55,8 +55,6 @@ def get_dev_datas(folder_path, multi_folder_path):
     folder_paths = os.listdir(folder_path)
     err_paths = []
     scene_paths = {}
-    
-
 
     # 存储每个场景对应的输出文件夹路径
     scene_output_paths = {}
@@ -86,7 +84,6 @@ def get_dev_datas(folder_path, multi_folder_path):
 
     # 使用字典存储每个文件夹名称与其对应的DataFrame
     xlsx_datas = {}
-    i = 0
     for filepath in err_paths:
         folder_name = os.path.basename(os.path.dirname(filepath))
         xlsx_data = pd.read_csv(filepath)
@@ -437,13 +434,13 @@ def report_gen_func(input_cfg):
     # 第三章
     write_chapter3()
     # 保存文档
-    doc.save(r'C:\Users\admin\Desktop\测试报告.docx')
+    doc.save(r'C:\Users\wyx\OneDrive\python\proj_test\测试报告.docx')
 
 
 if __name__ == '__main__':
     input_cfg = {
-        'multi_dev_err_path': r'C:\Users\admin\OneDrive\python\Data_analysis_py\multi_dev_err_plot',
-        'path_proj_dev': r'C:\Users\admin\OneDrive\python\Data_analysis_py\result_all'
+        'multi_dev_err_path': r"C:\Users\wyx\OneDrive\python\proj_test\multi_dev_err_plot",
+        'path_proj_dev': r"C:\Users\wyx\OneDrive\python\proj_test\result_all"
     }
     report_gen_func(input_cfg)
     sys.exit(0)
