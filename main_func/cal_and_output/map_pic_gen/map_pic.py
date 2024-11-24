@@ -67,12 +67,15 @@ class MapGenerator:
         except Exception as e:
             logging.warning(f"清理WebDriver时出错: {str(e)}")
 
+
+
     def _create_map(self, center: List[float], zoom: int) -> folium.Map:
         """创建基础地图"""
         m = folium.Map(
             location=center,
             zoom_start=zoom,
-            tiles=None,
+            tiles="None",
+            attr="Local Leaflet",
             crs='EPSG4326'
         )
 
@@ -140,11 +143,11 @@ class MapGenerator:
 
             # 保存地图到临时HTML文件
             map_obj.save(temp_html)
-
+            replace_resources(temp_html)
             # 创建driver并获取截图
             driver = self._create_edge_driver()
             driver.get(f'file://{os.path.abspath(temp_html)}')
-            time.sleep(10)  # 给额外时间确保完全加载
+            time.sleep(15)  # 给额外时间确保完全加载
             driver.save_screenshot(output_path)
 
         except Exception as e:
@@ -220,6 +223,24 @@ class MapGenerator:
         except Exception as e:
             logging.error(f"生成地图失败: {str(e)}")
             raise
+
+def replace_resources(html_path):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(html_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # 替换外部资源为本地路径
+    content = content.replace(
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css',
+        f'file:///{current_dir}/source/leaflet.css'
+    )
+    content = content.replace(
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js',
+        f'file:///{current_dir}/source/leaflet.js'
+    )
+
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(content)
 
 
 def map_generator(datapaths: Union[str, List[str]], output_path_full: str, output_path_zoomed: str) -> None:
