@@ -6,6 +6,7 @@ import numpy as np
 
 # matlab color lib
 color_lib = {'dark_blue': '#0072BD', 'orange': '#D95319', 'yellow': '#EDB120', 'purple': '#7E2F8E', 'green': '#77AC30', 'light_blue': '#4DBEEE', 'red': '#A2142F', 'black': '#000000'}
+matplotlib.rcParams['font.family'] = 'Microsoft YaHei'
 
 
 def sigma(err: np.ndarray, input_cfg) -> dict:
@@ -35,9 +36,9 @@ def fig_plt(xaxis_list, yaxis_list, title: list, xlabel: str, ylabel: str, fig_p
         for xaxis_dev, yaxis_dev, color_inturn in zip(xaxis_list, yaxis_idct, color_lib.values()):
             ax[i].plot(xaxis_dev, yaxis_dev, color=color_inturn, linewidth=0.5)
         ax[i].ticklabel_format(axis='x', style='plain')
-        ax[i].set_title(title[i], fontdict={'family': 'Microsoft YaHei', 'size': 16, 'weight': 'bold'})
-        ax[i].set_xlabel(xlabel, fontdict={'family': 'Microsoft YaHei', 'size': 14})
-        ax[i].set_ylabel(ylabel, fontdict={'family': 'Microsoft YaHei', 'size': 14})
+        ax[i].set_title(title[i], fontdict={'size': 16, 'weight': 'bold'})
+        ax[i].set_xlabel(xlabel, fontdict={'size': 14})
+        ax[i].set_ylabel(ylabel, fontdict={'size': 14})
         ax[i].grid(color='lightgray', linestyle='-', linewidth=0.5)
         if len(kwargs) > 0 and kwargs['is_multiplot']:
             ax[i].legend(args[0])
