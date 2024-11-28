@@ -439,9 +439,9 @@ def report_gen_func(input_cfg):
 
 if __name__ == '__main__':
     input_cfg = {
-        'path_proj': r'D:\python\zhongqichuangzhi',
-        'multi_dev_err_path': r"D:\python\zhongqichuangzhi\multi_dev_err_plot",
-        'path_proj_dev': r"D:\python\zhongqichuangzhi\result_all"
+        'path_proj': r"J:\工规客户数据\主机\中汽创智\惯导测试数据\1119\1119_zqcz",
+        'multi_dev_err_path': r"J:\工规客户数据\主机\中汽创智\惯导测试数据\1119\1119_zqcz\multi_dev_err_plot",
+        'path_proj_dev': r"J:\工规客户数据\主机\中汽创智\惯导测试数据\1119\1119_zqcz\result_all"
     }
     report_gen_func(input_cfg)
     sys.exit(0)

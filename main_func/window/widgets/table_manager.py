@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (QTableWidgetItem, QComboBox, QMenu, QHeaderView,
                              QMessageBox, QFileDialog)
 from window.widgets.custom_widgets import CenteredCheckBox
 import logging
+from PyQt6.QtGui import QAction
 
 
 class TableManager:
@@ -30,35 +31,39 @@ class TableManager:
         self.main_window.ui.tableWidget.customContextMenuRequested.connect(self.show_tableWidget_context_menu)
         self.main_window.ui.tableWidget_2.customContextMenuRequested.connect(self.show_tableWidget_2_context_menu)
 
-    def show_tableWidget_context_menu(self, position):
-        menu = QMenu()
-        delete_action = menu.addAction("删除")
-        action = menu.exec(self.main_window.ui.tableWidget.mapToGlobal(position))
-        if action == delete_action:
-            self.delete_selected_rows(self.main_window.ui.tableWidget)
+    # # original code
+    # def show_tableWidget_context_menu(self, position):
+    #     menu = QMenu()
+    #     delete_action = menu.addAction("删除")
+    #     action = menu.exec(self.main_window.ui.tableWidget.mapToGlobal(position))
+    #     if action == delete_action:
+    #         self.delete_selected_rows(self.main_window.ui.tableWidget)
 
-    def show_tableWidget_2_context_menu(self, position):
-        menu = QMenu()
-        add_action = menu.addAction("添加行")
-        delete_action = menu.addAction("删除")
-        action = menu.exec(self.main_window.ui.tableWidget_2.mapToGlobal(position))
-        if action == add_action:
-            self.add_new_row(self.main_window.ui.tableWidget_2)
-        elif action == delete_action:
-            self.delete_selected_rows(self.main_window.ui.tableWidget_2)
+    # # original code
+    # def show_tableWidget_2_context_menu(self, position):
+    #     menu = QMenu()
+    #     add_action = menu.addAction("添加行")
+    #     delete_action = menu.addAction("删除")
+    #     action = menu.exec(self.main_window.ui.tableWidget_2.mapToGlobal(position))
+    #     if action == add_action:
+    #         self.add_new_row(self.main_window.ui.tableWidget_2)
+    #     elif action == delete_action:
+    #         self.delete_selected_rows(self.main_window.ui.tableWidget_2)
 
-    def delete_selected_rows(self, table_widget):
-        rows = sorted(set(index.row() for index in table_widget.selectedIndexes()), reverse=True)
-        for row in rows:
-            table_widget.removeRow(row)
-            if table_widget == self.main_window.ui.tableWidget:
-                del self.file_data[row]
+    # # original code
+    # def delete_selected_rows(self, table_widget):
+    #     rows = sorted(set(index.row() for index in table_widget.selectedIndexes()), reverse=True)
+    #     for row in rows:
+    #         table_widget.removeRow(row)
+    #         if table_widget == self.main_window.ui.tableWidget:
+    #             del self.file_data[row]
 
-    def add_new_row(self, table_widget):
-        row_position = table_widget.rowCount()
-        table_widget.insertRow(row_position)
-        for column in range(table_widget.columnCount()):
-            table_widget.setItem(row_position, column, QTableWidgetItem(""))
+    # # original code
+    # def add_new_row(self, table_widget):
+    #     row_position = table_widget.rowCount()
+    #     table_widget.insertRow(row_position)
+    #     for column in range(table_widget.columnCount()):
+    #         table_widget.setItem(row_position, column, QTableWidgetItem(""))
 
     def create_table_controls(self, row_position, data=None):
         """创建表格控件的辅助函数"""
@@ -70,7 +75,7 @@ class TableManager:
 
         # 创建格式下拉框
         format_combo = QComboBox()
-        format_combo.addItems(["navplot", "GPCHC"])
+        format_combo.addItems(["navplot", "GPCHC", "zqcz_agg"])
         if data and 'data_format' in data:
             index = format_combo.findText(data['data_format'])
             if index >= 0:
@@ -131,3 +136,106 @@ class TableManager:
                 table1.insertRow(row_position)
                 table1.setItem(row_position, 0, QTableWidgetItem(file_path))
                 self.create_table_controls(row_position)
+
+    # test for show_tableWidget_context_menu
+    def show_tableWidget_context_menu(self, position):
+        # 获取点击位置的单元格
+        index = self.main_window.ui.tableWidget.indexAt(position)
+        # 判断是否点击在表格区域内
+        if index.isValid():
+            # 在表格内右键点击
+            self.show_table_context_menu(position, index)
+        else:
+            # 在表格外右键点击
+            self.show_empty_space_context_menu(position)
+
+    def show_table_context_menu(self, position, index):
+        # 获取右键菜单
+        menu = QMenu()
+
+        # 添加删除选中行的菜单项
+        delete_action = QAction("删除行")
+        delete_action.triggered.connect(lambda: self.delete_row(index.row(), self.main_window.ui.tableWidget))
+        menu.addAction(delete_action)
+
+        # 显示菜单
+        menu.exec(self.main_window.ui.tableWidget.mapToGlobal(position))
+
+    def show_empty_space_context_menu(self, position):
+        # 获取右键菜单
+        menu = QMenu()
+
+        # 删除最后一行的菜单项
+        delete_last_row_action = QAction("删除行")
+        delete_last_row_action.triggered.connect(lambda: self.delete_row(self.main_window.ui.tableWidget.rowCount() - 1, self.main_window.ui.tableWidget))
+        menu.addAction(delete_last_row_action)
+
+        # 显示菜单
+        menu.exec(self.main_window.ui.tableWidget.mapToGlobal(position))
+
+    # test for show_tableWidget_2_context_menu
+    def show_tableWidget_2_context_menu(self, position):
+        # 获取点击位置的单元格
+        index = self.main_window.ui.tableWidget_2.indexAt(position)
+        # 判断是否点击在表格区域内
+        if index.isValid():
+            # 在表格内右键点击
+            self.show_table_context_menu_2(position, index)
+        else:
+            # 在表格外右键点击
+            self.show_empty_space_context_menu_2(position)
+
+    def show_table_context_menu_2(self, position, index):
+        # 获取右键菜单
+        menu = QMenu()
+
+        # 添加删除选中行的菜单项
+        delete_action = QAction("删除行")
+        delete_action.triggered.connect(lambda: self.delete_row(index.row(), self.main_window.ui.tableWidget_2))
+        menu.addAction(delete_action)
+
+        # 在选中行上方添加一行的菜单项
+        add_above_action = QAction("在上方插入行")
+        add_above_action.triggered.connect(lambda: self.add_row(index.row(), self.main_window.ui.tableWidget_2))
+        menu.addAction(add_above_action)
+
+        # 在选中行下方添加一行的菜单项
+        add_below_action = QAction("在下方插入行")
+        add_below_action.triggered.connect(lambda: self.add_row(index.row() + 1, self.main_window.ui.tableWidget_2))
+        menu.addAction(add_below_action)
+
+        # 显示菜单
+        menu.exec(self.main_window.ui.tableWidget_2.mapToGlobal(position))
+
+    def show_empty_space_context_menu_2(self, position):
+        # 获取右键菜单
+        menu = QMenu()
+
+        # 删除最后一行的菜单项
+        delete_last_row_action = QAction("删除行")
+        delete_last_row_action.triggered.connect(lambda: self.delete_row(self.main_window.ui.tableWidget_2.rowCount() - 1, self.main_window.ui.tableWidget_2))
+        menu.addAction(delete_last_row_action)
+
+        # 在最后一行下方添加一行的菜单项
+        add_last_row_below_action = QAction("在下方插入行")
+        add_last_row_below_action.triggered.connect(lambda: self.add_row(self.main_window.ui.tableWidget_2.rowCount(), self.main_window.ui.tableWidget_2))
+        menu.addAction(add_last_row_below_action)
+
+        # 显示菜单
+        menu.exec(self.main_window.ui.tableWidget_2.mapToGlobal(position))
+
+    # test for delete_selected_rows
+    def delete_row(self, row, table_widget):
+        if row >= 0:
+            # 删除指定行
+            table_widget.removeRow(row)
+        else:
+            return
+
+    # test for add_row
+    def add_row(self, row, table_widget):
+        # 在指定行位置添加一行
+        table_widget.insertRow(row)
+        # 可以为新行填充默认数据
+        for column in range(table_widget.columnCount()):
+            table_widget.setItem(row, column, QTableWidgetItem(""))

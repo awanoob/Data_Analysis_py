@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QFileDialog, QMessageBox
 from window.config.settings import DEFAULT_PROJECT_CONFIG
 # from main_func.window.ui_configdialog import ConfigDialog
 from window.ui_configdialog import ConfigDialog
+from window.widgets.table_manager import TableManager as tm
 
 class ProjectManager:
     def __init__(self, main_window):
@@ -43,7 +44,7 @@ class ProjectManager:
                 file_path += '.yaml'
             try:
                 self.project_config['path_proj'] = os.path.dirname(file_path)
-                with open(file_path, 'w') as f:
+                with open(file_path, 'w', encoding='utf-8') as f:
                     yaml.dump(self.project_config, f, allow_unicode=True)
 
                 self.current_project_file = file_path
@@ -97,6 +98,10 @@ class ProjectManager:
                 else:
                     return
 
+            # 更新配置
+            self.project_config['data'] = tm.get_table1_data(self)  # 更新data
+            self.project_config['era_list'] = tm.get_table2_data(self)  # 更新era_list
+            # 更新其他配置，待实现
             with open(self.current_project_file, 'w', encoding='utf-8') as f:
                 yaml.dump(self.project_config, f, allow_unicode=True)
 

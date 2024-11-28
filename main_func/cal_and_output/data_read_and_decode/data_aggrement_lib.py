@@ -7,9 +7,9 @@ import numpy as np
 
 
 # navplot协议数据解析
-def decode_navplot(data_path: str) -> np.ndarray:
+def decode_navplot(data_path: str, encoding: str) -> np.ndarray:
     # 以空格作为分隔符读取数据
-    file_matrix = np.genfromtxt(data_path, delimiter=None, encoding='utf-8')
+    file_matrix = np.genfromtxt(data_path, delimiter=None, encoding=encoding)
     # 将特定列的数据提取出来，组成新的数据矩阵
     data_matrix = np.zeros((file_matrix.shape[0], 24))
     data_matrix[:, [0]] = file_matrix[:, [0]]
@@ -31,4 +31,28 @@ def decode_navplot(data_path: str) -> np.ndarray:
     return data_matrix
 
 
-__all__ = ['decode_navplot']
+def decode_zqcz_agg(data_path: str, encoding: str) -> np.ndarray:
+    # 以逗号作为分隔符读取数据，首行为header
+    file_matrix = np.genfromtxt(data_path, delimiter=',', skip_header=1, encoding=encoding)
+    # 将特定列的数据提取出来，组成新的数据矩阵
+    data_matrix = np.zeros((file_matrix.shape[0], 24))
+    data_matrix[:, [0]] = file_matrix[:, [0]]
+    # 时间保留两位小数，四舍五入
+    data_matrix[:, [1]] = np.round(file_matrix[:, [1]], 2)
+    data_matrix[:, [2]] = file_matrix[:, [10]]
+    data_matrix[:, [3]] = file_matrix[:, [9]]
+    data_matrix[:, [4]] = file_matrix[:, [11]]
+    data_matrix[:, [5]] = file_matrix[:, [17]]
+    data_matrix[:, [6]] = file_matrix[:, [16]]
+    data_matrix[:, [7]] = file_matrix[:, [18]]
+    data_matrix[:, [8]] = file_matrix[:, [14]]
+    data_matrix[:, [9]] = file_matrix[:, [13]]
+    data_matrix[:, [10]] = file_matrix[:, [12]]
+    data_matrix[:, [11]] = file_matrix[:, [2]]
+    data_matrix[:, [12]] = file_matrix[:, [8]]
+
+    data_matrix = np.nan_to_num(data_matrix)
+    return data_matrix
+
+
+__all__ = ['decode_navplot', 'decode_zqcz_agg']

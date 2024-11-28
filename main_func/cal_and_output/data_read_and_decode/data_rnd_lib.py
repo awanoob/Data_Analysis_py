@@ -1,15 +1,20 @@
 from cal_and_output.data_read_and_decode.data_aggrement_lib import *
 import numpy as np
+from charset_normalizer import detect
 
 
 def data_decode(data_path: str, data_agg: int) -> np.ndarray:
+    # 检测数据文件编码格式
+    encoding = detect_encoding(data_path)
     # data_agg:
     # 1: navplot协议，分隔符为空格，无数据头，长度27个字段
     # 2: GPCHC协议，分隔符为逗号和*号，数据头为$GPCHC，长度
     if data_agg == 'navplot':
-        data_matrix = decode_navplot(data_path)
+        data_matrix = decode_navplot(data_path, encoding)
     elif data_agg == 'GPCHC':
         pass
+    elif data_agg == 'zqcz_agg':
+        data_matrix = decode_zqcz_agg(data_path, encoding)
     return data_matrix
 
 
@@ -39,6 +44,15 @@ def pack_lost_chk(data_matrix: np.ndarray, data_frq: int, out_repo_path: str) ->
     with open(out_repo_path, 'w') as f:
         f.write(f'丢包数: {lost_packets}\n')
         f.write(f'丢包率: {lost_packet_rate}%\n')
+
+
+def detect_encoding(data_path: str) -> str:
+    with open(data_path, 'rb') as f:
+        data = f.read(1024)
+    result = detect(data)
+    if result['encoding'] is None:
+        raise ValueError("无法检测文件编码")
+    return result['encoding']
 
 
 __all__ = ['data_decode', 'output_navplot', 'pack_lost_chk']

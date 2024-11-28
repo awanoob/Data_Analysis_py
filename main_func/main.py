@@ -78,8 +78,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def calculate_error_with_progress(self):
         """执行误差计算并显示进度"""
-        self.project_manager.project_config['data'] = self.table_manager.get_table1_data()
-        self.project_manager.project_config['era_list'] = self.table_manager.get_table2_data()
+        # 将配置更新写进save_project函数内，下面的代码注释掉
+        # self.project_manager.project_config['data'] = self.table_manager.get_table1_data()
+        # self.project_manager.project_config['era_list'] = self.table_manager.get_table2_data()
 
         # 保存项目
         if self.project_manager.current_project_file:

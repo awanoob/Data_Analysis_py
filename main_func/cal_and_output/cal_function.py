@@ -45,6 +45,8 @@ def cal_Func(yaml_path: str):
     array_bchmk_ori = data_decode(data_bchmk['data_path'], data_bchmk['data_format'])
 
     for i in range(len(data_test)):
+        # 打印当前处理的数据路径
+        print(f"当前处理的数据路径为：{data_test[i]['data_path']}")
         # 根据被测数据文件名称生成项目子路径
         path_proj_dev = join(input_cfg['path_proj'], 'result_all', data_test[i]['dev_name'])
         # 创建项目子路径
@@ -94,6 +96,9 @@ def cal_Func(yaml_path: str):
         if input_cfg['era_auto_all']:
             input_cfg['era_list'].pop()
 
+        # 打印当前设备处理完成
+        print(f"设备{data_test[i]['dev_name']}处理完成")
+
     if 'multi_dev_err_dict' in locals():
         # 输出多设备误差对比图
         multi_dev_err_plot(multi_dev_err_dict, input_cfg)
@@ -103,12 +108,13 @@ def cal_Func(yaml_path: str):
     input_cfg['path_proj_dev'] = input_cfg['path_proj'] + '/result_all'
     # 输出报告
     report_gen_func(input_cfg)
+    print('计算完成')
 
 
 # test
 if __name__ == '__main__':
     pr = cProfile.Profile()
     pr.enable()
-    cal_Func(r"J:\CODE\VSCode\Python\pytest\beta_test_v0.0.1_3rd\beta_test_3rd.yaml")
+    cal_Func(r"J:\工规客户数据\主机\中汽创智\惯导测试数据\1119\1119_zqcz\1119_proj.yaml")
     pr.disable()
-    pr.dump_stats('cal_func_2.prof')
+    pr.dump_stats('cal_func_3.prof')

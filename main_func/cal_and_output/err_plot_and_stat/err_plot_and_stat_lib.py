@@ -307,7 +307,11 @@ def dr_err_stat(errlist_scn, scene_name):
     index_fix = np.where(errlist_scn[turnel_index:, 13] == 1)[0]
     if len(index_fix) == 0:
         fix_time = '>30s'
-    fix_time = errlist_scn[turnel_index + index_fix[0], 1] - errlist_scn[turnel_index, 1]
+    elif len(index_fix) == len(errlist_scn[turnel_index:, 13]):
+        print("无有效搜星数，不进行计算")
+        fix_time = 'NaN'
+    else:
+        fix_time = errlist_scn[turnel_index + index_fix[0], 1] - errlist_scn[turnel_index, 1]
 
 
     # 生成DR误差统计列表
