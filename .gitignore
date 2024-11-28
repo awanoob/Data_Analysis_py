@@ -1,2 +1,10 @@
-**/__pycache__
-**/**/__pycache__
+# 忽略所有pycache文件夹
+**/__pycache__/
+
+# 忽略打包产物
+**/build/
+**/dist/
+**/*.spec
+
+# 忽略prof文件
+**/*.prof
