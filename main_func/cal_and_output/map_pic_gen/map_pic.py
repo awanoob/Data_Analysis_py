@@ -50,8 +50,8 @@ class MapGenerator:
                 service=Service(EdgeChromiumDriverManager().install()),
                 options=options
             )
-            self._driver.set_page_load_timeout(30)
-            self._driver.set_script_timeout(30)
+            self._driver.set_page_load_timeout(60)
+            self._driver.set_script_timeout(60)
             return self._driver
 
         except Exception as e:
@@ -105,7 +105,7 @@ class MapGenerator:
                 weight=2,
                 color=color,
                 opacity=0.8,
-                popup=f'设备 {device_name}'
+                popup=f'{device_name}'
             ).add_to(map_obj)
 
         if len(lines_data) > 1:
@@ -269,7 +269,7 @@ def map_generator(datapaths: Union[str, List[str]], output_path_full: str, outpu
         for datapath in datapaths:
             try:
                 data = pd.read_csv(datapath, sep=" ", header=None)
-                dev_name = re.search(r'result_all\\(\d+)', datapath).group(1)
+                dev_name = re.search(r'result_all\\([^\\]+)', datapath).group(1)
                 if not data.empty:
                     line_coords = [(row[3], row[4]) for row in data.itertuples()]
                     lines_data[dev_name] = line_coords

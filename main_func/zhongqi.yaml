@@ -2,27 +2,12 @@ cal_alt_syserr: 2
 cal_att_syserr: 2
 cal_pos_syserr: 2
 cvrt2navplot: true
-data:
-- data_format: navplot
-  data_frq: 1Hz
-  data_path: C:/Users/wyx/Desktop/830/proj/830-ins-off.txt
-  dev_name: CGI-830
-  is_bchmk: false
-- data_format: navplot
-  data_frq: 1Hz
-  data_path: C:/Users/wyx/Desktop/100C/proj/100C-off-1HZ
-  dev_name: 100C
-  is_bchmk: true
+data: []
 era_auto_all: false
-era_list:
-- era_end: '198836'
-  era_start: '198350'
-  scene: ¿Õ¿õ
-out2car_coor: false
+era_list: []
+out2car_coor: true
 output_cep: false
-output_fig: true
-output_multi_fig: true
-path_proj: C:/Users/wyx/OneDrive/python/Data_Analysis_py/main_func
+path_proj: D:/python/Data_Analysis_py/main_func
 usr_def_syserr_h: -3
 usr_def_syserr_list: []
 usr_def_syserr_p: -3

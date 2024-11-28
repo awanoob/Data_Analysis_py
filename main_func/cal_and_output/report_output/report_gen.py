@@ -42,7 +42,7 @@ def get_png_files(folder_path):
                 # 获取当前文件夹的名称作为键
                 folder_key = os.path.basename(foldername)
                 # 获取文件名作为值
-                png_filenames = [os.path.relpath(png) for png in png_filepaths]
+                png_filenames = [os.path.abspath(png) for png in png_filepaths]
                 # 将文件夹名与文件名列表添加到字典中
                 png_files[folder_key] = png_filenames
 
@@ -439,9 +439,9 @@ def report_gen_func(input_cfg):
 
 if __name__ == '__main__':
     input_cfg = {
-        'path_proj': r'J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test',
-        'multi_dev_err_path': r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\multi_dev_err_plot",
-        'path_proj_dev': r"J:\CODE\VSCode\Python\pytest\D_A_T_2\proj_test\result_all"
+        'path_proj': r'D:\python\zhongqichuangzhi',
+        'multi_dev_err_path': r"D:\python\zhongqichuangzhi\multi_dev_err_plot",
+        'path_proj_dev': r"D:\python\zhongqichuangzhi\result_all"
     }
     report_gen_func(input_cfg)
     sys.exit(0)

@@ -14,7 +14,7 @@ from cal_and_output.err_plot_and_stat.result_gen import result_gen_func
 from cal_and_output.report_output.report_gen import report_gen_func
 from cal_and_output.proj_cfg_read import yaml_read
 import cProfile
-import flameprof
+# import flameprof
 
 
 def cal_Func(yaml_path: str):
