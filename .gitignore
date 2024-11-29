@@ -9,3 +9,12 @@
 # 忽略prof文件和svg文件
 **/*.prof
 **/*.svg
+
+# 忽略pyc文件
+**/*.pyc
+
+# 忽略组件文件
+**/*.yaml
+**/*.csv
+**/*.navplot
+**/test/

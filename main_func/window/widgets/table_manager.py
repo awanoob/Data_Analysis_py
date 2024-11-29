@@ -29,7 +29,7 @@ class TableManager:
 
     def setup_context_menus(self):
         self.main_window.ui.tableWidget.customContextMenuRequested.connect(self.show_tableWidget_context_menu)
-        self.main_window.ui.tableWidget_2.customContextMenuRequested.connect(self.show_tableWidget_2_context_menu)
+        self.main_window.ui.tableWidget_2.customContextMenuRequested.connect(self.show_tableWidget_context_menu)
 
     # # original code
     # def show_tableWidget_context_menu(self, position):
@@ -139,90 +139,58 @@ class TableManager:
 
     # test for show_tableWidget_context_menu
     def show_tableWidget_context_menu(self, position):
+        # 获取触发右键菜单的表格控件
+        sender = self.main_window.sender()
         # 获取点击位置的单元格
-        index = self.main_window.ui.tableWidget.indexAt(position)
+        index = sender.indexAt(position)
         # 判断是否点击在表格区域内
         if index.isValid():
             # 在表格内右键点击
-            self.show_table_context_menu(position, index)
+            self.show_table_context_menu(sender, position, index)
         else:
             # 在表格外右键点击
-            self.show_empty_space_context_menu(position)
+            self.show_empty_space_context_menu(sender, position)
 
-    def show_table_context_menu(self, position, index):
+    def show_table_context_menu(self, table_widget, position, index):
         # 获取右键菜单
         menu = QMenu()
 
         # 添加删除选中行的菜单项
         delete_action = QAction("删除行")
-        delete_action.triggered.connect(lambda: self.delete_row(index.row(), self.main_window.ui.tableWidget))
+        delete_action.triggered.connect(lambda: self.delete_row(index.row(), table_widget))
         menu.addAction(delete_action)
 
-        # 显示菜单
-        menu.exec(self.main_window.ui.tableWidget.mapToGlobal(position))
+        if table_widget == self.main_window.ui.tableWidget_2:
+            # 在选中行下方添加一行的菜单项
+            add_below_action = QAction("在下方插入行")
+            add_below_action.triggered.connect(lambda: self.add_row(index.row() + 1, table_widget))
+            menu.addAction(add_below_action)
 
-    def show_empty_space_context_menu(self, position):
+            # 在选中行上方添加一行的菜单项
+            add_above_action = QAction("在上方插入行")
+            add_above_action.triggered.connect(lambda: self.add_row(index.row(), table_widget))
+            menu.addAction(add_above_action)
+
+        # 显示菜单
+        menu.exec(table_widget.mapToGlobal(position))
+
+    def show_empty_space_context_menu(self, table_widget, position):
         # 获取右键菜单
         menu = QMenu()
 
         # 删除最后一行的菜单项
         delete_last_row_action = QAction("删除行")
-        delete_last_row_action.triggered.connect(lambda: self.delete_row(self.main_window.ui.tableWidget.rowCount() - 1, self.main_window.ui.tableWidget))
+        delete_last_row_action.triggered.connect(lambda: self.delete_row(table_widget.rowCount() - 1, table_widget))
         menu.addAction(delete_last_row_action)
 
-        # 显示菜单
-        menu.exec(self.main_window.ui.tableWidget.mapToGlobal(position))
-
-    # test for show_tableWidget_2_context_menu
-    def show_tableWidget_2_context_menu(self, position):
-        # 获取点击位置的单元格
-        index = self.main_window.ui.tableWidget_2.indexAt(position)
-        # 判断是否点击在表格区域内
-        if index.isValid():
-            # 在表格内右键点击
-            self.show_table_context_menu_2(position, index)
-        else:
-            # 在表格外右键点击
-            self.show_empty_space_context_menu_2(position)
-
-    def show_table_context_menu_2(self, position, index):
-        # 获取右键菜单
-        menu = QMenu()
-
-        # 添加删除选中行的菜单项
-        delete_action = QAction("删除行")
-        delete_action.triggered.connect(lambda: self.delete_row(index.row(), self.main_window.ui.tableWidget_2))
-        menu.addAction(delete_action)
-
-        # 在选中行上方添加一行的菜单项
-        add_above_action = QAction("在上方插入行")
-        add_above_action.triggered.connect(lambda: self.add_row(index.row(), self.main_window.ui.tableWidget_2))
-        menu.addAction(add_above_action)
-
-        # 在选中行下方添加一行的菜单项
-        add_below_action = QAction("在下方插入行")
-        add_below_action.triggered.connect(lambda: self.add_row(index.row() + 1, self.main_window.ui.tableWidget_2))
-        menu.addAction(add_below_action)
+        if table_widget == self.main_window.ui.tableWidget_2:
+            # 在最后一行下方添加一行的菜单项
+            add_last_row_below_action = QAction("添加行")
+            add_last_row_below_action.triggered.connect(lambda: self.add_row(table_widget.rowCount(), table_widget))
+            menu.addAction(add_last_row_below_action)
 
         # 显示菜单
-        menu.exec(self.main_window.ui.tableWidget_2.mapToGlobal(position))
-
-    def show_empty_space_context_menu_2(self, position):
-        # 获取右键菜单
-        menu = QMenu()
-
-        # 删除最后一行的菜单项
-        delete_last_row_action = QAction("删除行")
-        delete_last_row_action.triggered.connect(lambda: self.delete_row(self.main_window.ui.tableWidget_2.rowCount() - 1, self.main_window.ui.tableWidget_2))
-        menu.addAction(delete_last_row_action)
-
-        # 在最后一行下方添加一行的菜单项
-        add_last_row_below_action = QAction("在下方插入行")
-        add_last_row_below_action.triggered.connect(lambda: self.add_row(self.main_window.ui.tableWidget_2.rowCount(), self.main_window.ui.tableWidget_2))
-        menu.addAction(add_last_row_below_action)
-
-        # 显示菜单
-        menu.exec(self.main_window.ui.tableWidget_2.mapToGlobal(position))
+        menu.exec(table_widget.mapToGlobal(position))
 
     # test for delete_selected_rows
     def delete_row(self, row, table_widget):
