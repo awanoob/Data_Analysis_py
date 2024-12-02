@@ -17,7 +17,7 @@ from cal_and_output.map_pic_gen.map_pic import map_generator
 import cal_and_output.report_output.styles as styles
 
 # 打开模板文档
-doc = Document(r'.\cal_and_output\report_output\default\module_default.docx')
+doc = Document(r".\utilities\report_gen\module_default.docx")
 # doc = Document(r'.\default\module_default.docx')
 
 default_section = doc.sections[0]

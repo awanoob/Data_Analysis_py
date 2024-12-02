@@ -225,18 +225,18 @@ class MapGenerator:
             raise
 
 def replace_resources(html_path):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = r'.\utilities\map_pic_gen'
     with open(html_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
     # 替换外部资源为本地路径
     content = content.replace(
         'https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css',
-        f'file:///{current_dir}/source/leaflet.css'
+        f'file:///{current_dir}/leaflet.css'
     )
     content = content.replace(
         'https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js',
-        f'file:///{current_dir}/source/leaflet.js'
+        f'file:///{current_dir}/leaflet.js'
     )
 
     with open(html_path, 'w', encoding='utf-8') as f:

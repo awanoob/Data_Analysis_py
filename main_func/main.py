@@ -52,7 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def load_stylesheet(self):
         # 从外部文件加载样式表
         try:
-            with open('./window/qt6_style.qss', 'r', encoding='utf-8') as f:
+            with open(r'.\utilities\window\qt6_style.qss', 'r', encoding='utf-8') as f:
                 self.setStyleSheet(f.read())
         except Exception as e:
             logging.error(f"加载样式表失败: {e}")
@@ -106,6 +106,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == '__main__':
+    base_path = os.path.dirname(os.path.abspath(__file__))
     proxy_manager = ProxyManager()
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainWindow()

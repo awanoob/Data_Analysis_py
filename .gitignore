@@ -5,6 +5,7 @@
 **/build/
 **/dist/
 **/*.spec
+**/main/
 
 # 忽略prof文件和svg文件
 **/*.prof
