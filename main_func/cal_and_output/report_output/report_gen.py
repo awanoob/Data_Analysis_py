@@ -82,6 +82,17 @@ def get_dev_datas(folder_path, multi_folder_path):
             navplot_file = os.path.join(folder_path, folder, scene_folder, f"{scene_folder}_test.navplot")
             scene_paths[scene_folder].append(navplot_file)
 
+    bchmk_folder = folder_paths[0]
+    for scene_folder in os.listdir(os.path.join(folder_path, bchmk_folder)):
+        if os.path.isdir(os.path.join(folder_path, bchmk_folder, scene_folder)) and '.' not in scene_folder:
+            bchmk_file = os.path.join(folder_path, bchmk_folder, scene_folder, f"{scene_folder}_bchmk.navplot")
+            scene_paths[scene_folder].append(bchmk_file)
+
+
+
+
+
+
     # 使用字典存储每个文件夹名称与其对应的DataFrame
     xlsx_datas = {}
     for filepath in err_paths:

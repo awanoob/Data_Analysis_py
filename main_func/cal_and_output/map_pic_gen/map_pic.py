@@ -127,7 +127,7 @@ class MapGenerator:
                                     height: 15px;
                                     display: inline-block;
                                     margin-right: 5px;"></span>
-                        设备 {device_name}
+                         {device_name}
                     </p>
                 """
             legend_html += "</div>"
@@ -268,11 +268,18 @@ def map_generator(datapaths: Union[str, List[str]], output_path_full: str, outpu
         lines_data = {}
         for datapath in datapaths:
             try:
-                data = pd.read_csv(datapath, sep=" ", header=None)
-                dev_name = re.search(r'result_all\\([^\\]+)', datapath).group(1)
-                if not data.empty:
-                    line_coords = [(row[3], row[4]) for row in data.itertuples()]
-                    lines_data[dev_name] = line_coords
+                if 'bchmk' in datapath:
+                    data = pd.read_csv(datapath, sep=" ", header=None)
+                    dev_name = '真值设备'
+                    if not data.empty:
+                        line_coords = [(row[3], row[4]) for row in data.itertuples()]
+                        lines_data[dev_name] = line_coords
+                else:
+                    data = pd.read_csv(datapath, sep=" ", header=None)
+                    dev_name = re.search(r'result_all\\([^\\]+)', datapath).group(1)
+                    if not data.empty:
+                        line_coords = [(row[3], row[4]) for row in data.itertuples()]
+                        lines_data[dev_name] = line_coords
             except Exception as e:
                 logging.warning(f"读取文件 {datapath} 失败: {str(e)}")
                 continue
