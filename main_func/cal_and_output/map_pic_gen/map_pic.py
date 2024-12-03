@@ -26,8 +26,8 @@ from selenium.webdriver.support import expected_conditions as EC
 class MapGenerator:
     def __init__(self):
         self.colors = [
-            '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-            '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+            '#0072BD', '#D95319', '#EDB120', '#7E2F8E', '#77AC30',
+            '#4DBEEE', '#A2142F', '#000000'
         ]
         self.api_key = "baef27b004fae0eca6b5187854d3f1af"
         self._driver = None
@@ -36,14 +36,14 @@ class MapGenerator:
         """创建Edge WebDriver，支持代理设置"""
         try:
             options = Options()
-            # options.add_argument("--headless")
+            options.add_argument("--headless")
             options.add_argument("--window-size=1280,960")
-            # options.add_argument("--no-sandbox")
-            # options.add_argument("--disable-dev-shm-usage")
-            # options.add_argument('--disable-gpu')
-            # options.add_argument('--disable-extensions')
-            # options.add_argument('--disable-infobars')
-            # options.add_argument('--ignore-certificate-errors')
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument('--disable-gpu')
+            options.add_argument('--disable-extensions')
+            options.add_argument('--disable-infobars')
+            options.add_argument('--ignore-certificate-errors')
 
             # 初始化 Edge WebDriver
             self._driver = webdriver.Edge(
@@ -66,8 +66,6 @@ class MapGenerator:
                 self._driver = None
         except Exception as e:
             logging.warning(f"清理WebDriver时出错: {str(e)}")
-
-
 
     def _create_map(self, center: List[float], zoom: int) -> folium.Map:
         """创建基础地图"""
@@ -224,6 +222,7 @@ class MapGenerator:
             logging.error(f"生成地图失败: {str(e)}")
             raise
 
+
 def replace_resources(html_path):
     current_dir = r'.\utilities\map_pic_gen'
     with open(html_path, 'r', encoding='utf-8') as f:
@@ -243,7 +242,8 @@ def replace_resources(html_path):
         f.write(content)
 
 
-def map_generator(datapaths: Union[str, List[str]], output_path_full: str, output_path_zoomed: str) -> None:
+def map_generator(datapaths: Union[str, List[str]], output_path_full: str, output_path_zoomed: str,
+                  devname: List[str]) -> None:
     """
     生成地图的主函数
 
@@ -268,9 +268,10 @@ def map_generator(datapaths: Union[str, List[str]], output_path_full: str, outpu
         lines_data = {}
         for datapath in datapaths:
             try:
+                # 根据文件路径中的标识来判断是否是特定设备数据
                 if 'bchmk' in datapath:
                     data = pd.read_csv(datapath, sep=" ", header=None)
-                    dev_name = '真值设备'
+                    dev_name = devname[-1]  # 默认为devname的最后一个值
                     if not data.empty:
                         line_coords = [(row[3], row[4]) for row in data.itertuples()]
                         lines_data[dev_name] = line_coords
@@ -284,12 +285,15 @@ def map_generator(datapaths: Union[str, List[str]], output_path_full: str, outpu
                 logging.warning(f"读取文件 {datapath} 失败: {str(e)}")
                 continue
 
+        # 按照devname中的值的顺序对lines_data进行排序
+        sorted_lines_data = {dev: lines_data[dev] for dev in devname if dev in lines_data}
+
         if not lines_data:
             raise ValueError("没有成功读取任何轨迹数据")
 
         map_generate = MapGenerator()
         map_generate.create_maps(
-            lines_data,
+            sorted_lines_data,
             output_path_full,
             output_path_zoomed
         )

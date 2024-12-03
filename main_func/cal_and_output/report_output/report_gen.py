@@ -49,8 +49,15 @@ def get_png_files(folder_path):
     return png_files
 
 
-def get_dev_datas(folder_path, multi_folder_path):
+def get_dev_datas(input_cfg):
     """获取csv误差文件并生成地图"""
+    multi_folder_path = input_cfg['multi_dev_err_path']
+    folder_path = input_cfg['path_proj_dev']
+    devname = []
+    for dev in input_cfg['data_test']:
+        devname.append(dev['dev_name'])
+    devname.append(input_cfg['data_bchmk']['dev_name'])
+
     # 获取该文件夹下的所有子文件夹的名称
     folder_paths = os.listdir(folder_path)
     err_paths = []
@@ -88,11 +95,6 @@ def get_dev_datas(folder_path, multi_folder_path):
             bchmk_file = os.path.join(folder_path, bchmk_folder, scene_folder, f"{scene_folder}_bchmk.navplot")
             scene_paths[scene_folder].append(bchmk_file)
 
-
-
-
-
-
     # 使用字典存储每个文件夹名称与其对应的DataFrame
     xlsx_datas = {}
     for filepath in err_paths:
@@ -116,7 +118,7 @@ def get_dev_datas(folder_path, multi_folder_path):
             output_path_zoomed = os.path.join(multi_folder_path, scene_name, f"{scene_name}_map_zoomed.png")
 
             # 调用map_gen生成地图
-            map_generator(navplot_files, output_path_full, output_path_zoomed)
+            map_generator(navplot_files, output_path_full, output_path_zoomed, devname)
 
             map_paths[scene_name] = (output_path_full, output_path_zoomed)
 
@@ -303,13 +305,16 @@ def write_chapter1():
     doc.add_paragraph('')
 
 
-def write_chapter2(pic_filepath, dev_filepath):
+def write_chapter2(input_cfg):
     """第二章的内容"""
+    pic_filepath = input_cfg['multi_dev_err_path']
+    dev_filepath = input_cfg['path_proj_dev']
+
     doc.add_paragraph('结果展示与总结', style='Heading 1')
     # 获取图片文件
     pic_files = get_png_files(pic_filepath)
     # 获取误差文件和地图文件
-    xlsx_datas, map_paths = get_dev_datas(dev_filepath, pic_filepath)
+    xlsx_datas, map_paths = get_dev_datas(input_cfg)
     product_names = list(xlsx_datas.keys())
 
     count = 1
@@ -425,10 +430,6 @@ def write_chapter3():
 
 
 def report_gen_func(input_cfg):
-    pic_folder_path = input_cfg['multi_dev_err_path']
-    dev_folder_path = input_cfg['path_proj_dev']
-    # 读取excel文件
-
     # 设置页脚信息
     header_info()
     # 封面
@@ -441,7 +442,7 @@ def report_gen_func(input_cfg):
     write_chapter1()
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
     # 第二章
-    write_chapter2(pic_folder_path, dev_folder_path)
+    write_chapter2(input_cfg)
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
     # 第三章
     write_chapter3()
