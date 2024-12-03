@@ -322,13 +322,14 @@ def write_chapter2(pic_filepath, dev_filepath):
         doc.add_paragraph(f'图2.{count} 场景轨迹图', style='PictureName')
         count += 1
 
-        # 处理误差序列图
-        doc.add_paragraph('（2）误差序列图')
         paragraph = doc.add_paragraph(style='Picture')
         run = paragraph.add_run()
         run.add_picture(map_paths[title][1], width=Cm(15))
         doc.add_paragraph(f'图2.{count} 局部对比图', style='PictureName')
         count += 1
+
+        # 处理误差序列图
+        doc.add_paragraph('（2）误差序列图')
         # 定义图片类型和顺序
         pic_types = {
             '_xy.png': {'order': 1, 'description': '位置误差-1'},
